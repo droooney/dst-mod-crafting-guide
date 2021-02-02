@@ -5,7 +5,7 @@ require("stringutil")
 
 local DEBUG_MODE = true
 
---DEBUG_MODE = false
+-- DEBUG_MODE = false
 
 return {
     IsDST = TheSim:GetGameID() == "DST",
@@ -92,7 +92,7 @@ return {
                 end
 
                 local matches = (
-                ingredientsMatch(recipe.ingredients)
+                    ingredientsMatch(recipe.ingredients)
                     or ingredientsMatch(recipe.tech_ingredients)
                     or ingredientsMatch(recipe.character_ingredients)
                 )

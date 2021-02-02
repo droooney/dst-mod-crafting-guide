@@ -1,4 +1,5 @@
 local CraftingWidgetPopupScreen = require("./widgets/CraftingWidgetPopupScreen")
+local Constants = require("./Constants")
 local Util = require("./Util")
 
 require("./i18n/en")
@@ -15,6 +16,10 @@ function LoadI18N()
         require("./i18n/" .. lang)
     end
 end
+
+Assets = {
+    Asset("ATLAS", Constants.CUSTOM_ICONS_ATLAS),
+}
 
 -- TODO: find out why doesn't work in standard world
 AddClassPostConstruct("widgets/controls", function ()
@@ -36,7 +41,7 @@ AddClassPostConstruct("widgets/controls", function ()
             Util:Log("inspecting item: " .. target.prefab)
 
             self.inst:DoTaskInTime(0, function ()
-                Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(target.prefab))
+                Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(Util:GetPlayer(), target.prefab))
             end)
         end
     end

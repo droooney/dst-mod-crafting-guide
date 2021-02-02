@@ -7,7 +7,7 @@ local CraftingWidget = require("./widgets/CraftingWidget")
 
 require("constants")
 
-local CraftingWidgetPopupScreen = Class(Screen, function (self, prefab)
+local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
     Screen._ctor(self, "CraftingWidgetPopupScreen")
 
     local overlay = self:AddChild(ImageButton("images/global.xml", "square.tex"))
@@ -29,7 +29,7 @@ local CraftingWidgetPopupScreen = Class(Screen, function (self, prefab)
     root:SetHAnchor(ANCHOR_MIDDLE)
     root:SetVAnchor(ANCHOR_MIDDLE)
 
-    self.craftingWidget = root:AddChild(CraftingWidget(prefab, function ()
+    self.craftingWidget = root:AddChild(CraftingWidget(owner, prefab, function ()
         self.Close()
     end))
 end)
