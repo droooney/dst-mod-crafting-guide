@@ -5,9 +5,6 @@ local Image = require("widgets/image")
 local Text = require("widgets/text")
 local IngredientUI = require("widgets/ingredientui")
 
-require("constants")
-require("fonts")
-
 local Util = require("./Util")
 
 local RECIPE_WIDTH = 200
@@ -20,14 +17,16 @@ local INGREDIENT_SPACING = 3
 local IngredientWidget = Class(Widget, function (self, ingredient, needed, onHand, has)
     Widget._ctor(self, "IngredientWidget")
 
+    local prefabName = Util:GetPrefabString(ingredient.type)
+
     self.root = self:AddChild(Widget("root"))
     self.ingredientUI = self.root:AddChild(IngredientUI(
-        ingredient:GetAtlas(), ingredient:GetImage(), needed, onHand, has,
-        STRINGS.NAMES[string.upper(ingredient.type)], Util:GetPlayer(), ingredient.type
+        ingredient:GetAtlas(), ingredient:GetImage(), needed, onHand,
+        has, prefabName, Util:GetPlayer(), ingredient.type
     ))
     self.ingredientUI:SetScale(0.8, 0.8, 0.8)
 
-    self:SetHoverText(STRINGS.NAMES[string.upper(ingredient.type)])
+    self:SetHoverText(prefabName)
 end)
 
 return IngredientWidget

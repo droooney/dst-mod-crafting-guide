@@ -1,36 +1,43 @@
-local InvSlot = require("widgets/invslot")
-local LocoMotor = require("components/locomotor")
-
 local CraftingWidgetPopupScreen = require("./widgets/CraftingWidgetPopupScreen")
 local Util = require("./Util")
 
---local oldInvSlotInspect = InvSlot.Inspect
---
---function InvSlot:Inspect()
-----    oldInvSlotInspect(self)
---
---    if self.tile and self.tile.item then
---        Util:Log("inspecting item: "..self.tile.item.prefab)
---        Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen())
---    end
---end
+require("./i18n/en")
 
-local oldLocoMotorPushAction = LocoMotor.PushAction
+local SUPPORTED_LANGUAGES = {
+    en = true,
+    ru = true,
+}
 
-function LocoMotor:PushAction(bufferedaction, ...)
-    if bufferedaction.action ~= GLOBAL.ACTIONS.LOOKAT then
-        oldLocoMotorPushAction(self, bufferedaction, ...)
+function LoadI18N()
+    local lang = GLOBAL.LanguageTranslator.defaultlang or nil
 
-        return
-    end
-
-    local target = bufferedaction.target or bufferedaction.invobject
-
-    if target and target.prefab then
-        Util:Log("inspecting item: " .. target.prefab)
-
-        self.inst:DoTaskInTime(0, function ()
-            Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(target.prefab))
-        end)
+    if lang and SUPPORTED_LANGUAGES[lang] then
+        require("./i18n/" .. lang)
     end
 end
+
+-- TODO: find out why doesn't work in standard world
+AddClassPostConstruct("widgets/controls", function ()
+    LoadI18N()
+
+    local LocoMotor = require("components/locomotor")
+    local oldLocoMotorPushAction = LocoMotor.PushAction
+
+    function LocoMotor:PushAction(bufferedaction, ...)
+        if bufferedaction.action ~= GLOBAL.ACTIONS.LOOKAT then
+            oldLocoMotorPushAction(self, bufferedaction, ...)
+
+            return
+        end
+
+        local target = bufferedaction.target or bufferedaction.invobject
+
+        if target and target.prefab then
+            Util:Log("inspecting item: " .. target.prefab)
+
+            self.inst:DoTaskInTime(0, function ()
+                Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(target.prefab))
+            end)
+        end
+    end
+end)

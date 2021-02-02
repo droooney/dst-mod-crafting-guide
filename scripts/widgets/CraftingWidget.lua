@@ -11,6 +11,7 @@ local ImageButton = require("widgets/imagebutton")
 require("constants")
 require("fonts")
 require("mathutil")
+require("strings")
 require("widgets/widgetutil")
 
 local IngredientWidget = require("./widgets/IngredientWidget")
@@ -33,20 +34,52 @@ local BUILDER_TAG_MAP = {
     masterchef = "warly",
     pinetreepioneer = "walter",
     werehuman = "woodie",
-    valkyrie = "wigfrid",
+    valkyrie = "wathgrithr",
     pebblemaker = "walter",
     merm_builder = "wurt",
     bookbuilder = "wickerbottom",
     shadowmagic = "waxwell",
     handyperson = "winona",
     elixirbrewer = "wendy",
-    battlesinger = "wigfrid",
+    battlesinger = "wathgrithr",
     professionalchef = "warly",
+    plantkin = "wormwood",
 }
 
 local IMPORTANT_EVENTS = {
     "techtreechange", "itemget", "itemlose", "newactiveitem",
     "stacksizechange", "unlockrecipe", "refreshcrafting", "refreshinventory"
+}
+
+local REQUIRED_TECH = {
+    SCIENCE_1 = "researchlab",
+    SCIENCE_2 = "researchlab2",
+    SCIENCE_3 = "researchlab2",
+
+    MAGIC_2 = "researchlab4",
+    MAGIC_3 = "researchlab3",
+
+    ANCIENT_2 = "ancient_altar_broken",
+    ANCIENT_4 = "ancient_altar",
+
+    CELESTIAL_1 = "moonrockseed",
+
+    MOON_ALTAR_2 = "moon_altar",
+
+    SHADOW_3 = "waxwelljournal",
+
+    SEAFARING_2 = "seafaring_prototyper",
+
+    SCULPTING_1 = "sculptingtable",
+
+    -- FIXME: fix image
+    ORPHANAGE_1 = "critterlab",
+
+    MADSCIENCE_1 = "madscience_lab",
+
+    FOODPROCESSING_1 = "madscience_lab",
+
+    -- TODO: finish all
 }
 
 local CraftingWidget = Class(Widget, function (self, prefab, close)
@@ -117,7 +150,7 @@ local CraftingWidget = Class(Widget, function (self, prefab, close)
     self.inst:ListenForEvent("healthdelta", OnHealthDeltaChange, self.owner)
     self.inst:ListenForEvent("sanitydelta", OnSanityDeltaChange, self.owner)
 
-    for _, event in pairs(IMPORTANT_EVENTS) do
+    for _, event in ipairs(IMPORTANT_EVENTS) do
         self.inst:ListenForEvent(event, function () self.needToUpdateRecipes = true end, self.owner)
     end
 end)
@@ -171,7 +204,7 @@ function CraftingWidget:FillGridItem(context, gridItem, recipe, i)
     local shouldHint = not knows and not (builder:CanLearn(recipe.name) and CanPrototypeRecipe(recipe.level, techLevel))
 
     gridItem.root:Show()
-    gridItem.name:SetTruncatedString(STRINGS.NAMES[string.upper(recipe.product)], 180, nil, true)
+    gridItem.name:SetTruncatedString(Util:GetPrefabString(recipe.product), 180, nil, true)
     gridItem.recipeImage:SetTexture(recipe:GetAtlas(), recipe.image)
     gridItem.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
 
@@ -207,25 +240,90 @@ function CraftingWidget:FillGridItem(context, gridItem, recipe, i)
     local tabIcon = Image(recipe.tab.icon_atlas or "images/hud.xml", recipe.tab.icon)
 
     tabIcon:SetScale(0.25, 0.25, 0.25)
+    tabIcon:SetHoverText(Util:GetReplacedString(
+        STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TAB,
+        { tab = STRINGS.TABS[recipe.tab.str] }
+    ))
 
     table.insert(gridItem.requirements.items, tabIcon)
 
     if recipe.builder_tag and BUILDER_TAG_MAP[recipe.builder_tag] ~= nil then
-        local avatarIcon = Image("images/avatars.xml", "avatar_" .. BUILDER_TAG_MAP[recipe.builder_tag] .. ".tex")
+        local charName = BUILDER_TAG_MAP[recipe.builder_tag]
+        local avatarIcon = Image("images/avatars.xml", "avatar_" .. charName .. ".tex")
 
         avatarIcon:SetScale(0.4, 0.4, 0.4)
+        avatarIcon:SetHoverText(Util:GetReplacedString(
+            STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_CHARACTER,
+            { character = Util:GetPrefabString(charName) }
+        ))
 
         table.insert(gridItem.requirements.items, avatarIcon)
     end
 
-    if Util:IsLostRecipe(recipe) then
-        local blueprintIcon = Image("images/inventoryimages.xml", "blueprint_rare.tex")
+    if not knows and Util:IsLostRecipe(recipe) then
+        local blueprintOrSketchIcon = Image(
+            "images/inventoryimages.xml",
+            recipe.tab == RECIPETABS.SCULPTING
+                and "sketch.tex"
+                or "blueprint_rare.tex"
+        )
 
-        blueprintIcon:SetScale(0.4, 0.4, 0.4)
+        blueprintOrSketchIcon:SetScale(0.4, 0.4, 0.4)
+        blueprintOrSketchIcon:SetHoverText(
+            recipe.tab == RECIPETABS.SCULPTING
+                and STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_SKETCH
+                or STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_RARE_BLUEPRINT
+        )
 
-        table.insert(gridItem.requirements.items, blueprintIcon)
-    elseif 1 then
+        table.insert(gridItem.requirements.items, blueprintOrSketchIcon)
+    end
 
+    if
+        recipe.tab == RECIPETABS.SCULPTING
+        or (not knows and not CanPrototypeRecipe(recipe.level, techLevel))
+    then
+        local techPrefab
+
+        if recipe.tab == RECIPETABS.SCULPTING then
+            techPrefab = REQUIRED_TECH.SCULPTING_1
+        else
+            for tech, value in pairs(recipe.level) do
+                -- FIXME: fix for wickerbottom
+
+                techPrefab = REQUIRED_TECH[tech .. "_" .. value]
+
+                if techPrefab then
+                    break
+                end
+            end
+        end
+
+        if techPrefab then
+            local techIcon
+
+            if techPrefab == "ancient_altar_broken" or techPrefab == "ancient_altar" then
+                techIcon = Image(recipe.tab.icon_atlas or "images/hud.xml", recipe.tab.icon)
+
+                techIcon:SetScale(0.25, 0.25, 0.25)
+            else
+                local imgTex = techPrefab .. ".tex"
+
+                techIcon = Image(Util:GetInventoryItemAtlas(imgTex), imgTex)
+
+                techIcon:SetScale(0.4, 0.4, 0.4)
+            end
+
+            local techString = Util:GetPrefabString(techPrefab)
+
+            techIcon:SetHoverText(Util:GetReplacedString(
+                recipe.nounlock
+                    and STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_BUILD
+                    or STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_PROTOTYPE,
+                { tech = techString }
+            ))
+
+            table.insert(gridItem.requirements.items, techIcon)
+        end
     end
 
     for i, ingredient in ipairs(gridItem.ingredients.items) do

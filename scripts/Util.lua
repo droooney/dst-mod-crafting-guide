@@ -1,5 +1,8 @@
 local inspect = require("inspect")
 
+require("strings")
+require("stringutil")
+
 local DEBUG_MODE = true
 
 --DEBUG_MODE = false
@@ -72,7 +75,7 @@ return {
     GetAllRecipes = function (self, prefab)
         local recipes = {}
 
-        for name, recipe in pairs(AllRecipes) do
+        for _, recipe in pairs(AllRecipes) do
             if recipe.tab then
                 local ingredientsMatch = function (ingredients)
                     local matches = false
@@ -106,4 +109,12 @@ return {
     IsLostRecipe = function (self, recipe)
         return recipe.level.MAGIC >= 10 and recipe.level.SCIENCE >= 10 and recipe.level.ANCIENT >= 10
     end,
+
+    GetPrefabString = function (self, prefab)
+        return STRINGS.NAMES[string.upper(prefab)] or prefab
+    end,
+
+    GetReplacedString = function (self, template, replacements)
+        return subfmt(template, replacements)
+    end
 }
