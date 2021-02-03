@@ -21,27 +21,17 @@ Assets = {
     Asset("ATLAS", Constants.CUSTOM_ICONS_ATLAS),
 }
 
--- TODO: find out why doesn't work in standard world
 AddClassPostConstruct("widgets/controls", function ()
     LoadI18N()
 
-    local LocoMotor = require("components/locomotor")
-    local oldLocoMotorPushAction = LocoMotor.PushAction
+    local InventoryReplica = require("components/inventory_replica")
 
-    function LocoMotor:PushAction(bufferedaction, ...)
-        if bufferedaction.action ~= GLOBAL.ACTIONS.LOOKAT then
-            oldLocoMotorPushAction(self, bufferedaction, ...)
-
-            return
-        end
-
-        local target = bufferedaction.target or bufferedaction.invobject
-
-        if target and target.prefab then
-            Util:Log("inspecting item: " .. target.prefab)
+    function InventoryReplica:InspectItemFromInvTile(item)
+        if item and item.prefab then
+            Util:Log("inspecting item from inventory: " .. item.prefab)
 
             self.inst:DoTaskInTime(0, function ()
-                Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(Util:GetPlayer(), target.prefab))
+                Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(Util:GetPlayer(), item.prefab))
             end)
         end
     end
