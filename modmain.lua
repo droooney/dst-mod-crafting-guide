@@ -2,6 +2,7 @@ local CraftingWidgetPopupScreen = require("./widgets/CraftingWidgetPopupScreen")
 local Constants = require("./Constants")
 local Util = require("./Util")
 
+require("./i18n/common")
 require("./i18n/en")
 
 local SUPPORTED_LANGUAGES = {

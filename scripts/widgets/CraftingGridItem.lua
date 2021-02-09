@@ -65,14 +65,9 @@ function CraftingGridItem:SetRecipe(recipe)
     local knows = builder:KnowsRecipe(recipe.name)
     local buffered = builder:IsBuildBuffered(recipe.name)
     local canBuild = builder:CanBuild(recipe.name)
+    local canLearn = builder:CanLearn(recipe.name)
     local techLevel = builder:GetTechTrees()
-    local shouldHint = not knows and not (builder:CanLearn(recipe.name) and CanPrototypeRecipe(recipe.level, techLevel))
-    local actionText = (
-        (not (knows or recipe.nounlock) and STRINGS.UI.CRAFTING.PROTOTYPE)
-        or (buffered and STRINGS.UI.CRAFTING.PLACE)
-        or STRINGS.UI.CRAFTING.TABACTION[recipe.tab.str]
-        or STRINGS.UI.CRAFTING.BUILD
-    )
+    local shouldHint = not knows and not (canLearn and CanPrototypeRecipe(recipe.level, techLevel))
 
     self.root:Show()
     self.name:SetTruncatedString(Util:GetPrefabString(recipe.product), 180, nil, true)
@@ -171,11 +166,7 @@ function CraftingGridItem:SetRecipe(recipe)
         if techPrefab then
             local techIcon
 
-            if techPrefab == "ancient_altar_broken" or techPrefab == "ancient_altar" then
-                local tab = RECIPETABS.ANCIENT
-
-                techIcon = Image(tab.icon_atlas or "images/hud.xml", tab.icon)
-            elseif Constants.CUSTOM_PREFAB_ICONS[techPrefab] then
+            if Constants.CUSTOM_PREFAB_ICONS[techPrefab] then
                 techIcon = Image(Constants.CUSTOM_ICONS_ATLAS, techPrefab .. ".tex")
             else
                 local imgTex = techPrefab .. ".tex"
@@ -215,7 +206,12 @@ function CraftingGridItem:SetRecipe(recipe)
         requirement:SetPosition((i - (#self.requirements.items + 1) / 2) * (REQUIREMENT_SIZE + REQUIREMENT_SPACING), 0, 0)
     end
 
-    self.craftButton:SetText(actionText)
+    self.craftButton:SetText(
+        (not knows and not recipe.nounlock and canLearn and STRINGS.UI.CRAFTING.PROTOTYPE)
+        or (buffered and STRINGS.UI.CRAFTING.PLACE)
+        or STRINGS.UI.CRAFTING.TABACTION[recipe.tab.str]
+        or STRINGS.UI.CRAFTING.BUILD
+    )
 
     if (buffered or canBuild) and not shouldHint then
         self.craftButton:Enable()

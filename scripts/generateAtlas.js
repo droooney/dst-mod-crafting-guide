@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const map = [
-    ['hermitcrab', 'critterlab', 'moon_altar']
+    ['hermitcrab',    'critterlab',           'moon_altar'],
+    ['ancient_altar', 'ancient_altar_broken'],
 ];
 const mapWidth = 4;
 const mapHeight = 2;

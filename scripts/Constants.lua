@@ -25,7 +25,6 @@ local REQUIRED_TECH = {
     MAGIC_2 = "researchlab4",
     MAGIC_3 = "researchlab3",
 
-    -- FIXME: fix images
     ANCIENT_2 = "ancient_altar_broken",
     ANCIENT_4 = "ancient_altar",
 
@@ -47,12 +46,17 @@ local REQUIRED_TECH = {
 
     FISHING_1 = "tacklestation",
 
+    -- TODO: show level on the icon (and in the tooltip)
     HERMITCRABSHOP_1 = "hermitcrab",
     HERMITCRABSHOP_3 = "hermitcrab",
     HERMITCRABSHOP_5 = "hermitcrab",
     HERMITCRABSHOP_7 = "hermitcrab",
 
-    -- TODO: finish all
+    TURFCRAFTING_1 = "turfcraftingstation",
+
+    WINTERSFEASTCOOKING_1 = "wintersfeastoven",
+
+    -- TODO: add year of the beefalo
 }
 
 local CUSTOM_ICONS_ATLAS = resolvefilepath("images/icons.xml")
@@ -61,6 +65,8 @@ local CUSTOM_PREFAB_ICONS = {
     hermitcrab = true,
     critterlab = true,
     moon_altar = true,
+    ancient_altar_broken = true,
+    ancient_altar = true,
 }
 
 return {
