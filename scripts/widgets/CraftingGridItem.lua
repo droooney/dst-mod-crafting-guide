@@ -20,19 +20,20 @@ local INGREDIENT_SPACING = 3
 local REQUIREMENT_SIZE = 25
 local REQUIREMENT_SPACING = 2
 
-local CraftingGridItem = Class(Widget, function (self, owner, closePopup)
+local CraftingGridItem = Class(Widget, function (self, options)
     Widget._ctor(self, "CraftingGridItem")
 
-    self.owner = owner
-    self.closePopup = closePopup
+    self.owner = options.owner
+    self.closePopup = options.closePopup
     self.root = self:AddChild(Widget("root"))
-    self.recipeItemBg = self.root:AddChild(Image("images/plantregistry.xml", "plant_entry_active.tex"))
-    self.name = self.root:AddChild(Text(UIFONT, 28))
-    self.recipeImage = self.root:AddChild(Image())
-    self.craftedCount = self.root:AddChild(Text(UIFONT, 32))
-    self.ingredients = self.root:AddChild(Widget("ingredients"))
-    self.requirements = self.root:AddChild(Widget("requirements"))
-    self.craftButton = self.root:AddChild(ImageButton())
+    self.rootButton = self.root:AddChild(ImageButton("images/plantregistry.xml", "plant_entry.tex", "plant_entry_focus.tex"))
+    self.recipeItemBg = self.rootButton:AddChild(Image("images/plantregistry.xml", "plant_entry_active.tex"))
+    self.name = self.rootButton:AddChild(Text(UIFONT, 28))
+    self.recipeImage = self.rootButton:AddChild(Image())
+    self.craftedCount = self.rootButton:AddChild(Text(UIFONT, 32))
+    self.ingredients = self.rootButton:AddChild(Widget("ingredients"))
+    self.requirements = self.rootButton:AddChild(Widget("requirements"))
+    self.craftButton = self.rootButton:AddChild(ImageButton())
 
     self.ingredients.items = {}
     self.requirements.items = {}
@@ -50,10 +51,30 @@ local CraftingGridItem = Class(Widget, function (self, owner, closePopup)
     self.craftButton:SetScale(0.7, 0.7, 0.7)
     self.craftButton:SetPosition(0, -110, 0)
 
+    local _OnControl = self.rootButton.OnControl
+
+    self.rootButton.OnControl = function (_, control, down)
+        if self.craftButton.focus then
+            self.craftButton:OnControl(control, down)
+
+            return true
+        end
+
+        return _OnControl(_, control, down)
+    end
+
+    self.rootButton:SetOnClick(function ()
+        if self.recipe then
+            options.chooseItem(self.recipe.name)
+        end
+    end)
+
     self.root:Hide()
 end)
 
 function CraftingGridItem:SetRecipe(recipe)
+    self.recipe = recipe
+
     if not recipe then
         self.root:Hide()
 

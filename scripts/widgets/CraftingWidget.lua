@@ -13,17 +13,20 @@ local IMPORTANT_EVENTS = {
     "stacksizechange", "unlockrecipe", "refreshcrafting", "refreshinventory"
 }
 
-local CraftingWidget = Class(Widget, function (self, owner, prefab, closePopup)
+local CraftingWidget = Class(Widget, function (self, options)
     Widget._ctor(self, "CraftingWidget")
 
+    local owner = options.owner
+    local prefab = options.prefab
+
     self.prefab = prefab
-    self.owner = owner
-    self.closePopup = closePopup
+    self.owner = options.owner
+    self.chooseItem = options.chooseItem
     self.needToUpdateRecipes = false
     self.allRecipes = Util:GetAllRecipes(prefab)
     self.root = self:AddChild(Widget("root"))
 
-    Util:Log("recipes count", #self.allRecipes)
+    Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
 
     local dialog = self.root:AddChild(Templates.RectangleWindow(890, 500))
 
@@ -36,7 +39,11 @@ local CraftingWidget = Class(Widget, function (self, owner, prefab, closePopup)
         num_visible_rows = 1.3,
         num_columns = 4,
         item_ctor_fn = function ()
-            return CraftingGridItem(owner, closePopup)
+            return CraftingGridItem({
+                owner = owner,
+                closePopup = options.closePopup,
+                chooseItem = function (...) self:ChooseItem(...) end,
+            })
         end,
         apply_fn = function (context, gridItem, recipe)
             gridItem:SetRecipe(recipe)
@@ -45,7 +52,7 @@ local CraftingWidget = Class(Widget, function (self, owner, prefab, closePopup)
         scrollbar_height_offset = -60
     }))
 
-    self.root:AddChild(Templates.BackButton(closePopup))
+    self.root:AddChild(Templates.BackButton(options.navigateBack))
 
     local lastHealthSeg = nil
     local lastHealthPenaltySeg = nil
@@ -89,6 +96,24 @@ local CraftingWidget = Class(Widget, function (self, owner, prefab, closePopup)
         self.inst:ListenForEvent(event, function () self.needToUpdateRecipes = true end, owner)
     end
 end)
+
+function CraftingWidget:ChooseItem(prefab)
+    self.chooseItem(prefab, self.grid.current_scroll_pos)
+end
+
+function CraftingWidget:SetPrefab(prefab, scrollY)
+    self.prefab = prefab
+    self.allRecipes = Util:GetAllRecipes(prefab)
+
+    Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
+
+    self.grid:SetItemsData(self.allRecipes)
+
+    self.grid.target_scroll_pos = scrollY
+    self.grid.current_scroll_pos = scrollY
+
+    self.grid:RefreshView()
+end
 
 function CraftingWidget:OnUpdate()
     if self.needToUpdateRecipes then

@@ -29,13 +29,45 @@ local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
     root:SetHAnchor(ANCHOR_MIDDLE)
     root:SetVAnchor(ANCHOR_MIDDLE)
 
-    self.craftingWidget = root:AddChild(CraftingWidget(owner, prefab, function ()
-        self.Close()
-    end))
+    self.prefabQueue = {{
+        prefab = prefab,
+        scrollY = 0,
+    }}
+
+    self.craftingWidget = root:AddChild(CraftingWidget({
+        owner = owner,
+        prefab = prefab,
+        closePopup = function () self:Close() end,
+        chooseItem = function (...) self:ChooseItem(...) end,
+        navigateBack = function (...) self:NavigateBack(...) end
+    }))
 end)
 
 function CraftingWidgetPopupScreen:Close()
     TheFrontEnd:PopScreen()
+end
+
+function CraftingWidgetPopupScreen:ChooseItem(prefab, scrollYToSave)
+    self.prefabQueue[#self.prefabQueue].scrollY = scrollYToSave
+
+    table.insert(self.prefabQueue, {
+        prefab = prefab,
+        scrollY = 0,
+    })
+
+    self.craftingWidget:SetPrefab(prefab, 0)
+end
+
+function CraftingWidgetPopupScreen:NavigateBack()
+    table.remove(self.prefabQueue)
+
+    if #self.prefabQueue > 0 then
+        local queueItem = self.prefabQueue[#self.prefabQueue]
+
+        self.craftingWidget:SetPrefab(queueItem.prefab, queueItem.scrollY)
+    else
+        self:Close()
+    end
 end
 
 function CraftingWidgetPopupScreen:OnControl(control, down)
