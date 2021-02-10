@@ -52,10 +52,10 @@ function CraftingWidgetPopupScreen:ChooseItem(prefab, scrollYToSave)
 
     table.insert(self.prefabQueue, {
         prefab = prefab,
-        scrollY = 0,
+        scrollY = 1,
     })
 
-    self.craftingWidget:SetPrefab(prefab, 0)
+    self.craftingWidget:SetPrefab(prefab, 1)
 end
 
 function CraftingWidgetPopupScreen:NavigateBack()

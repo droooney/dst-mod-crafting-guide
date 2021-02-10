@@ -25,6 +25,7 @@ local CraftingGridItem = Class(Widget, function (self, options)
 
     self.owner = options.owner
     self.closePopup = options.closePopup
+    self.chooseItem = options.chooseItem
     self.root = self:AddChild(Widget("root"))
     self.rootButton = self.root:AddChild(ImageButton("images/plantregistry.xml", "plant_entry.tex", "plant_entry_focus.tex"))
     self.recipeItemBg = self.rootButton:AddChild(Image("images/plantregistry.xml", "plant_entry_active.tex"))
@@ -54,32 +55,37 @@ local CraftingGridItem = Class(Widget, function (self, options)
     local _OnControl = self.rootButton.OnControl
 
     self.rootButton.OnControl = function (_, control, down)
+        -- TODO: don't pass scroll controls (or rather pass only left button controls)
+
         if self.craftButton.focus then
             self.craftButton:OnControl(control, down)
 
             return true
         end
 
+        for _, ingredient in ipairs(self.ingredients.items) do
+            if ingredient.rootButton.focus then
+                ingredient.rootButton:OnControl(control, down)
+
+                return true
+            end
+        end
+
         return _OnControl(_, control, down)
     end
-
-    self.rootButton:SetOnClick(function ()
-        if self.recipe then
-            options.chooseItem(self.recipe.name)
-        end
-    end)
 
     self.root:Hide()
 end)
 
-function CraftingGridItem:SetRecipe(recipe)
-    self.recipe = recipe
-
-    if not recipe then
+function CraftingGridItem:SetItemData(itemData)
+    if not itemData then
         self.root:Hide()
 
         return
     end
+
+    local recipe = itemData.recipe
+    local pagePrefab = itemData.pagePrefab
 
     local builder = self.owner.replica.builder
     local inventory = self.owner.replica.inventory
@@ -109,19 +115,40 @@ function CraftingGridItem:SetRecipe(recipe)
     for _, ingredient in ipairs(recipe.tech_ingredients) do
         local has = builder:HasTechIngredient(ingredient)
 
-        table.insert(self.ingredients.items, IngredientWidget(ingredient, nil, nil, has))
+        table.insert(self.ingredients.items, IngredientWidget({
+            ingredient = ingredient,
+            needed = nil,
+            onHand = nil,
+            has = has,
+            disabled = ingredient.type == pagePrefab,
+            chooseItem = self.chooseItem,
+        }))
     end
 
     for _, ingredient in ipairs(recipe.ingredients) do
         local has, onHand = inventory:Has(ingredient.type, RoundBiasedUp(ingredient.amount * builder:IngredientMod()))
 
-        table.insert(self.ingredients.items, IngredientWidget(ingredient, ingredient.amount, onHand, has))
+        table.insert(self.ingredients.items, IngredientWidget({
+            ingredient = ingredient,
+            needed = ingredient.amount,
+            onHand = onHand,
+            has = has,
+            disabled = ingredient.type == pagePrefab,
+            chooseItem = self.chooseItem,
+        }))
     end
 
     for _, ingredient in ipairs(recipe.character_ingredients) do
         local has, amount = builder:HasCharacterIngredient(ingredient)
 
-        table.insert(self.ingredients.items, IngredientWidget(ingredient, ingredient.amount, amount, has))
+        table.insert(self.ingredients.items, IngredientWidget({
+            ingredient = ingredient,
+            needed = ingredient.amount,
+            onHand = amount,
+            has = has,
+            disabled = ingredient.type == pagePrefab,
+            chooseItem = self.chooseItem,
+        }))
     end
 
     local tabIcon = Image(recipe.tab.icon_atlas or "images/hud.xml", recipe.tab.icon)
@@ -247,6 +274,10 @@ function CraftingGridItem:SetRecipe(recipe)
 
         -- TODO: add support for skins
         DoRecipeClick(self.owner, recipe, recipe.name)
+    end)
+
+    self.rootButton:SetOnClick(function ()
+        self.chooseItem(recipe.name)
     end)
 end
 

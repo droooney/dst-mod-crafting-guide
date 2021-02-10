@@ -23,8 +23,9 @@ local CraftingWidget = Class(Widget, function (self, options)
     self.owner = options.owner
     self.chooseItem = options.chooseItem
     self.needToUpdateRecipes = false
-    self.allRecipes = Util:GetAllRecipes(prefab)
     self.root = self:AddChild(Widget("root"))
+
+    self:SetRecipes()
 
     Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
 
@@ -45,8 +46,8 @@ local CraftingWidget = Class(Widget, function (self, options)
                 chooseItem = function (...) self:ChooseItem(...) end,
             })
         end,
-        apply_fn = function (context, gridItem, recipe)
-            gridItem:SetRecipe(recipe)
+        apply_fn = function (context, gridItem, itemData)
+            gridItem:SetItemData(itemData)
         end,
         scrollbar_offset = 20,
         scrollbar_height_offset = -60
@@ -101,9 +102,23 @@ function CraftingWidget:ChooseItem(prefab)
     self.chooseItem(prefab, self.grid.current_scroll_pos)
 end
 
+function CraftingWidget:SetRecipes()
+    local recipes = Util:GetAllRecipes(self.prefab)
+
+    self.allRecipes = {}
+
+    for _, recipe in ipairs(recipes) do
+        table.insert(self.allRecipes, {
+            recipe = recipe,
+            pagePrefab = self.prefab,
+        })
+    end
+end
+
 function CraftingWidget:SetPrefab(prefab, scrollY)
     self.prefab = prefab
-    self.allRecipes = Util:GetAllRecipes(prefab)
+
+    self:SetRecipes()
 
     Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
 
