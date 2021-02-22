@@ -20,8 +20,12 @@ local INGREDIENT_SPACING = 3
 local REQUIREMENT_SIZE = 25
 local REQUIREMENT_SPACING = 2
 
-local CraftingGridItem = Class(Widget, function (self, options)
-    Widget._ctor(self, "CraftingGridItem")
+--- CraftingRecipe
+-- @param options.owner      {Player}                    player instance
+-- @param options.closePopup {() => void}                close item popup
+-- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
+local CraftingRecipe = Class(Widget, function (self, options)
+    Widget._ctor(self, "CraftingRecipe")
 
     self.owner = options.owner
     self.closePopup = options.closePopup
@@ -77,7 +81,7 @@ local CraftingGridItem = Class(Widget, function (self, options)
     self.root:Hide()
 end)
 
-function CraftingGridItem:SetItemData(itemData)
+function CraftingRecipe:SetRecipeData(itemData)
     if not itemData then
         self.root:Hide()
 
@@ -281,4 +285,4 @@ function CraftingGridItem:SetItemData(itemData)
     end)
 end
 
-return CraftingGridItem
+return CraftingRecipe

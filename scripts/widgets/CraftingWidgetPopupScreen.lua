@@ -7,6 +7,9 @@ local CraftingWidget = require("./widgets/CraftingWidget")
 
 require("constants")
 
+--- CraftingWidgetPopupScreen
+-- @param owner  {Player}  player instance
+-- @param prefab {Prefab}  opened item prefab
 local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
     Screen._ctor(self, "CraftingWidgetPopupScreen")
 

@@ -79,7 +79,7 @@ return {
         for _, recipe in ipairs(recipes) do
             local groupKey
 
-            if groupingType == Constants.ITEMS_GROUPING_TYPE.TAB then
+            if groupingType == Constants.ItemsGroupingType.TAB then
                 groupKey = recipe.tab.str
             end
 
@@ -88,7 +88,7 @@ return {
             table.insert(groupsMap[groupKey], recipe)
         end
 
-        if groupingType == Constants.ITEMS_GROUPING_TYPE.TAB then
+        if groupingType == Constants.ItemsGroupingType.TAB then
             for _, tab in ipairs(RECIPETABS) do
                 local group = groupsMap[tab.str]
 
@@ -104,18 +104,18 @@ return {
     GetItemListRows = function (self, prefab, groupingType)
         local groups = self:GetAllRecipesGrouped()
         local rows = {{
-            type = Constants.ITEM_LIST_TYPE.GENERAL_INFO,
+            type = Constants.ItemListType.GENERAL_INFO,
         }}
 
         for _, group in ipairs(groups) do
             table.insert(rows, {
-                type = Constants.ITEM_LIST_TYPE.GROUP_HEADER,
+                type = Constants.ItemListType.GROUP_HEADER,
                 title = group.title,
                 image = group.image,
             })
 
-            for index, item in group.recipes do
-                local column = index % Constants.RECIPES_COLUMNS_COUNT
+            for i, item in group.recipes do
+                local column = i % Constants.RECIPES_COLUMNS_COUNT
 
                 if column == 1 then
                     local row = {}
@@ -125,7 +125,7 @@ return {
                     end
 
                     table.insert(rows, {
-                        type = Constants.ITEM_LIST_TYPE.ITEM_ROW,
+                        type = Constants.ItemListType.RECIPE_ROW,
                         recipes = row,
                     })
                 end

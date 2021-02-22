@@ -4,6 +4,8 @@ local Templates = require("widgets/redux/templates")
 local CraftingGridItem = require("./widgets/CraftingGridItem")
 local Util = require("./Util")
 
+require("constants")
+
 local RECIPE_WIDTH = 200
 local RECIPE_HEIGHT = 290
 local RECIPE_SPACING = 5
@@ -13,6 +15,12 @@ local IMPORTANT_EVENTS = {
     "stacksizechange", "unlockrecipe", "refreshcrafting", "refreshinventory"
 }
 
+--- CraftingWidget
+-- @param options.owner        {Player}                                     player instance
+-- @param options.prefab       {Prefab}                                     opened item prefab
+-- @param options.chooseItem   {(prefab: Prefab, scrollY: number) => void}  choose item callback
+-- @param options.navigateBack {() => void}                                 navigate to prev page
+-- @param options.closePopup   {() => void}                                 close item popup
 local CraftingWidget = Class(Widget, function (self, options)
     Widget._ctor(self, "CraftingWidget")
 
@@ -47,7 +55,7 @@ local CraftingWidget = Class(Widget, function (self, options)
             })
         end,
         apply_fn = function (context, gridItem, itemData)
-            gridItem:SetItemData(itemData)
+            gridItem:SetRecipeData(itemData)
         end,
         scrollbar_offset = 20,
         scrollbar_height_offset = -60

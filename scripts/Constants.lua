@@ -69,14 +69,14 @@ local CUSTOM_PREFAB_ICONS = {
     ancient_altar = true,
 }
 
-local ITEMS_GROUPING_TYPE = {
+local ItemsGroupingType = {
     TAB = 'TAB',
 }
 
-local ITEM_LIST_TYPE = {
+local ItemListType = {
     GENERAL_INFO = 'GENERAL_INFO',
     GROUP_HEADER = 'GROUP_HEADER',
-    ITEM_ROW = 'ITEM_ROW',
+    RECIPE_ROW = 'RECIPE_ROW',
 }
 
 local RECIPES_COLUMNS_COUNT = 4
@@ -86,7 +86,8 @@ return {
     REQUIRED_TECH = REQUIRED_TECH,
     CUSTOM_ICONS_ATLAS = CUSTOM_ICONS_ATLAS,
     CUSTOM_PREFAB_ICONS = CUSTOM_PREFAB_ICONS,
-    ITEMS_GROUPING_TYPE = ITEMS_GROUPING_TYPE,
-    ITEM_LIST_TYPE = ITEM_LIST_TYPE,
     RECIPES_COLUMNS_COUNT = RECIPES_COLUMNS_COUNT,
+
+    ItemsGroupingType = ItemsGroupingType,
+    ItemListType = ItemListType,
 }
