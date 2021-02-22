@@ -1,5 +1,8 @@
 local inspect = require("inspect")
 
+local Constants = require("./Constants")
+
+require("constants")
 require("strings")
 require("stringutil")
 
@@ -26,44 +29,6 @@ return {
         if DEBUG_MODE then
             print("[Crafting Guide]:", ...)
         end
-    end,
-
-    GetPrefabInfo = function (self, prefab)
-        local itemTex = prefab .. ".tex"
-        local atlas = GetInventoryItemAtlas(itemTex)
-        local name = STRINGS.NAMES[string.upper(prefab)] or prefab
-        local prefabData = Prefabs[prefab]
-
-        if prefabData then
-            -- first run we find assets with exact match of prefab name
-            if not atlas or not TheSim:AtlasContains(atlas, itemTex) then
-                for _, asset in ipairs(prefabData.assets) do
-                    if asset.type == "INV_IMAGE" then
-                        itemTex = asset.file .. ".tex"
-                        atlas = GetInventoryItemAtlas(itemTex)
-                    elseif asset.type == "ATLAS" then
-                        atlas = asset.file
-                    end
-                end
-            end
-
-            -- second run, a special case for migrated items, they are prefixed via `quagmire_`
-            if not atlas or not TheSim:AtlasContains(atlas, itemTex) then
-                for _, asset in ipairs(Prefabs[prefab].assets) do
-                    if asset.type == "INV_IMAGE" then
-                        itemTex = "quagmire_" .. asset.file .. ".tex"
-                        atlas = GetInventoryItemAtlas(itemTex)
-                    end
-                end
-            end
-        end
-
-        if not atlas or not TheSim:AtlasContains(atlas, itemTex) then
-            itemTex = nil
-            atlas = nil
-        end
-
-        return { itemTex = itemTex, atlas = atlas, name = name }
     end,
 
     GetInventoryItemAtlas = function (self, itemTex)
@@ -104,6 +69,72 @@ return {
         end
 
         return recipes
+    end,
+
+    GetAllRecipesGrouped = function (self, prefab, groupingType)
+        local recipes = self:GetAllRecipes()
+        local groupsMap = {}
+        local groups = {}
+
+        for _, recipe in ipairs(recipes) do
+            local groupKey
+
+            if groupingType == Constants.ITEMS_GROUPING_TYPE.TAB then
+                groupKey = recipe.tab.str
+            end
+
+            groupsMap[groupKey] = groupsMap[groupKey] or {}
+
+            table.insert(groupsMap[groupKey], recipe)
+        end
+
+        if groupingType == Constants.ITEMS_GROUPING_TYPE.TAB then
+            for _, tab in ipairs(RECIPETABS) do
+                local group = groupsMap[tab.str]
+
+                if group then
+                    table.insert(groups, group)
+                end
+            end
+        end
+
+        return groups
+    end,
+
+    GetItemListRows = function (self, prefab, groupingType)
+        local groups = self:GetAllRecipesGrouped()
+        local rows = {{
+            type = Constants.ITEM_LIST_TYPE.GENERAL_INFO,
+        }}
+
+        for _, group in ipairs(groups) do
+            table.insert(rows, {
+                type = Constants.ITEM_LIST_TYPE.GROUP_HEADER,
+                title = group.title,
+                image = group.image,
+            })
+
+            for index, item in group.recipes do
+                local column = index % Constants.RECIPES_COLUMNS_COUNT
+
+                if column == 1 then
+                    local row = {}
+
+                    for i = 1, Constants.RECIPES_COLUMNS_COUNT, 1 do
+                        table.insert(nil)
+                    end
+
+                    table.insert(rows, {
+                        type = Constants.ITEM_LIST_TYPE.ITEM_ROW,
+                        recipes = row,
+                    })
+                end
+
+                rows[#rows].recipes[column] = item
+            end
+        end
+
+        return rows
     end,
 
     IsLostRecipe = function (self, recipe)
