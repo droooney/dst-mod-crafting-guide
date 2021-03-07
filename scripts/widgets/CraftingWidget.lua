@@ -1,7 +1,9 @@
 local Widget = require("widgets/widget")
 local Templates = require("widgets/redux/templates")
 
-local CraftingGridItem = require("./widgets/CraftingGridItem")
+local RecipeWidget = require("./widgets/RecipeWidget")
+
+local Constants = require("./Constants")
 local Util = require("./Util")
 
 require("constants")
@@ -37,27 +39,24 @@ local CraftingWidget = Class(Widget, function (self, options)
 
     Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
 
-    local dialog = self.root:AddChild(Templates.RectangleWindow(890, 500))
+    local dialog = self.root:AddChild(Templates.RectangleWindow(Constants.ITEM_POPUP_WIDTH, Constants.ITEM_POPUP_HEIGHT))
 
     self.grid = dialog:AddChild(Templates.ScrollingGrid(self.allRecipes, {
-        scroll_context = {
-            screen = self,
-        },
-        widget_width = RECIPE_WIDTH + RECIPE_SPACING,
-        widget_height = RECIPE_HEIGHT + RECIPE_SPACING,
-        num_visible_rows = 1.3,
-        num_columns = 4,
+        widget_width = Constants.RECIPE_WIDTH + Constants.RECIPE_SPACING,
+        widget_height = Constants.RECIPE_HEIGHT + Constants.RECIPE_SPACING,
+        num_visible_rows = Constants.VISIBLE_RECIPES,
+        num_columns = Constants.RECIPES_COLUMNS_COUNT,
         item_ctor_fn = function ()
-            return CraftingGridItem({
+            return RecipeWidget({
                 owner = owner,
                 closePopup = options.closePopup,
                 chooseItem = function (...) self:ChooseItem(...) end,
             })
         end,
-        apply_fn = function (context, gridItem, itemData)
-            gridItem:SetRecipeData(itemData)
+        apply_fn = function (context, recipeWidget, recipeData)
+            recipeWidget:SetRecipeData(recipeData)
         end,
-        scrollbar_offset = 20,
+        scrollbar_offset = (Constants.ITEM_POPUP_WIDTH - Constants.SCROLL_LIST_WIDTH) / 2,
         scrollbar_height_offset = -60
     }))
 

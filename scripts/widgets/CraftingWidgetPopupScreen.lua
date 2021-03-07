@@ -2,10 +2,13 @@ local Widget = require("widgets/widget")
 local Screen = require("widgets/screen")
 local ImageButton = require("widgets/imagebutton")
 
-local Util = require("./Util")
 local CraftingWidget = require("./widgets/CraftingWidget")
 
+local Util = require("./Util")
+
 require("constants")
+
+local INITIAL_SCROLL = 1
 
 --- CraftingWidgetPopupScreen
 -- @param owner  {Player}  player instance
@@ -34,7 +37,7 @@ local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
 
     self.prefabQueue = {{
         prefab = prefab,
-        scrollY = 0,
+        scrollY = INITIAL_SCROLL,
     }}
 
     self.craftingWidget = root:AddChild(CraftingWidget({
@@ -53,12 +56,14 @@ end
 function CraftingWidgetPopupScreen:ChooseItem(prefab, scrollYToSave)
     self.prefabQueue[#self.prefabQueue].scrollY = scrollYToSave
 
-    table.insert(self.prefabQueue, {
+    local queueItem = {
         prefab = prefab,
-        scrollY = 1,
-    })
+        scrollY = INITIAL_SCROLL,
+    }
 
-    self.craftingWidget:SetPrefab(prefab, 1)
+    table.insert(self.prefabQueue, queueItem)
+
+    self.craftingWidget:SetPrefab(queueItem.prefab, queueItem.scrollY)
 end
 
 function CraftingWidgetPopupScreen:NavigateBack()

@@ -72,7 +72,7 @@ return {
     end,
 
     GetAllRecipesGrouped = function (self, prefab, groupingType)
-        local recipes = self:GetAllRecipes()
+        local recipes = self:GetAllRecipes(prefab)
         local groupsMap = {}
         local groups = {}
 
@@ -83,13 +83,17 @@ return {
                 groupKey = recipe.tab.str
             end
 
-            groupsMap[groupKey] = groupsMap[groupKey] or {}
+            groupsMap[groupKey] = groupsMap[groupKey] or {
+                recipes = {},
+                title = STRINGS.TABS[recipe.tab.str],
+                image = nil,
+            }
 
-            table.insert(groupsMap[groupKey], recipe)
+            table.insert(groupsMap[groupKey].recipes, recipe)
         end
 
         if groupingType == Constants.ItemsGroupingType.TAB then
-            for _, tab in ipairs(RECIPETABS) do
+            for _, tab in pairs(RECIPETABS) do
                 local group = groupsMap[tab.str]
 
                 if group then
@@ -99,42 +103,6 @@ return {
         end
 
         return groups
-    end,
-
-    GetItemListRows = function (self, prefab, groupingType)
-        local groups = self:GetAllRecipesGrouped()
-        local rows = {{
-            type = Constants.ItemListType.GENERAL_INFO,
-        }}
-
-        for _, group in ipairs(groups) do
-            table.insert(rows, {
-                type = Constants.ItemListType.GROUP_HEADER,
-                title = group.title,
-                image = group.image,
-            })
-
-            for i, item in group.recipes do
-                local column = i % Constants.RECIPES_COLUMNS_COUNT
-
-                if column == 1 then
-                    local row = {}
-
-                    for i = 1, Constants.RECIPES_COLUMNS_COUNT, 1 do
-                        table.insert(nil)
-                    end
-
-                    table.insert(rows, {
-                        type = Constants.ItemListType.RECIPE_ROW,
-                        recipes = row,
-                    })
-                end
-
-                rows[#rows].recipes[column] = item
-            end
-        end
-
-        return rows
     end,
 
     IsLostRecipe = function (self, recipe)

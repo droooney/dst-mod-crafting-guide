@@ -20,12 +20,12 @@ local INGREDIENT_SPACING = 3
 local REQUIREMENT_SIZE = 25
 local REQUIREMENT_SPACING = 2
 
---- CraftingRecipe
+--- RecipeWidget
 -- @param options.owner      {Player}                    player instance
 -- @param options.closePopup {() => void}                close item popup
 -- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
-local CraftingRecipe = Class(Widget, function (self, options)
-    Widget._ctor(self, "CraftingRecipe")
+local RecipeWidget = Class(Widget, function (self, options)
+    Widget._ctor(self, "RecipeWidget")
 
     self.owner = options.owner
     self.closePopup = options.closePopup
@@ -81,15 +81,15 @@ local CraftingRecipe = Class(Widget, function (self, options)
     self.root:Hide()
 end)
 
-function CraftingRecipe:SetRecipeData(itemData)
-    if not itemData then
+function RecipeWidget:SetRecipeData(recipeData)
+    if not recipeData or not recipeData.recipe then
         self.root:Hide()
 
         return
     end
 
-    local recipe = itemData.recipe
-    local pagePrefab = itemData.pagePrefab
+    local recipe = recipeData.recipe
+    local pagePrefab = recipeData.pagePrefab
 
     local builder = self.owner.replica.builder
     local inventory = self.owner.replica.inventory
@@ -285,4 +285,4 @@ function CraftingRecipe:SetRecipeData(itemData)
     end)
 end
 
-return CraftingRecipe
+return RecipeWidget
