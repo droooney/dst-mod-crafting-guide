@@ -15,8 +15,8 @@ local RECIPE_SPACING = 5
 local INGREDIENT_SIZE = 55
 local INGREDIENT_SPACING = 3
 
-local IngredientWidget = Class(Widget, function (self, options)
-    Widget._ctor(self, "IngredientWidget")
+local Ingredient = Class(Widget, function (self, options)
+    Widget._ctor(self, "Ingredient")
 
     local ingredient = options.ingredient
     local prefabName = Util:GetPrefabString(ingredient.type)
@@ -40,4 +40,4 @@ local IngredientWidget = Class(Widget, function (self, options)
     end)
 end)
 
-return IngredientWidget
+return Ingredient

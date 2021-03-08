@@ -1,30 +1,26 @@
 local Widget = require("widgets/widget")
 local Templates = require("widgets/redux/templates")
 
-local RecipeWidget = require("./widgets/RecipeWidget")
+local Recipe = require("./widgets/Recipe")
 
 local Constants = require("./Constants")
 local Util = require("./Util")
 
 require("constants")
 
-local RECIPE_WIDTH = 200
-local RECIPE_HEIGHT = 290
-local RECIPE_SPACING = 5
-
 local IMPORTANT_EVENTS = {
     "techtreechange", "itemget", "itemlose", "newactiveitem",
     "stacksizechange", "unlockrecipe", "refreshcrafting", "refreshinventory"
 }
 
---- CraftingWidget
+--- RecipesTab
 -- @param options.owner        {Player}                                     player instance
 -- @param options.prefab       {Prefab}                                     opened item prefab
 -- @param options.chooseItem   {(prefab: Prefab, scrollY: number) => void}  choose item callback
 -- @param options.navigateBack {() => void}                                 navigate to prev page
 -- @param options.closePopup   {() => void}                                 close item popup
-local CraftingWidget = Class(Widget, function (self, options)
-    Widget._ctor(self, "CraftingWidget")
+local RecipesTab = Class(Widget, function (self, options)
+    Widget._ctor(self, "RecipesTab")
 
     local owner = options.owner
     local prefab = options.prefab
@@ -47,7 +43,7 @@ local CraftingWidget = Class(Widget, function (self, options)
         num_visible_rows = Constants.VISIBLE_RECIPES,
         num_columns = Constants.RECIPES_COLUMNS_COUNT,
         item_ctor_fn = function ()
-            return RecipeWidget({
+            return Recipe({
                 owner = owner,
                 closePopup = options.closePopup,
                 chooseItem = function (...) self:ChooseItem(...) end,
@@ -105,11 +101,11 @@ local CraftingWidget = Class(Widget, function (self, options)
     end
 end)
 
-function CraftingWidget:ChooseItem(prefab)
+function RecipesTab:ChooseItem(prefab)
     self.chooseItem(prefab, self.grid.current_scroll_pos)
 end
 
-function CraftingWidget:SetRecipes()
+function RecipesTab:SetRecipes()
     local recipes = Util:GetAllRecipes(self.prefab)
 
     self.allRecipes = {}
@@ -122,7 +118,7 @@ function CraftingWidget:SetRecipes()
     end
 end
 
-function CraftingWidget:SetPrefab(prefab, scrollY)
+function RecipesTab:SetPrefab(prefab, scrollY)
     self.prefab = prefab
 
     self:SetRecipes()
@@ -137,7 +133,7 @@ function CraftingWidget:SetPrefab(prefab, scrollY)
     self.grid:RefreshView()
 end
 
-function CraftingWidget:OnUpdate()
+function RecipesTab:OnUpdate()
     if self.needToUpdateRecipes then
         Util:Log("updating recipes")
 
@@ -147,4 +143,4 @@ function CraftingWidget:OnUpdate()
     end
 end
 
-return CraftingWidget
+return RecipesTab

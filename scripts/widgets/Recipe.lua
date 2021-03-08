@@ -3,7 +3,7 @@ local Image = require("widgets/image")
 local ImageButton = require("widgets/imagebutton")
 local Text = require("widgets/text")
 
-local IngredientWidget = require("./widgets/IngredientWidget")
+local Ingredient = require("./widgets/Ingredient")
 
 local Constants = require("./Constants")
 local Util = require("./Util")
@@ -20,12 +20,12 @@ local INGREDIENT_SPACING = 3
 local REQUIREMENT_SIZE = 25
 local REQUIREMENT_SPACING = 2
 
---- RecipeWidget
+--- Recipe
 -- @param options.owner      {Player}                    player instance
 -- @param options.closePopup {() => void}                close item popup
 -- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
-local RecipeWidget = Class(Widget, function (self, options)
-    Widget._ctor(self, "RecipeWidget")
+local Recipe = Class(Widget, function (self, options)
+    Widget._ctor(self, "Recipe")
 
     self.owner = options.owner
     self.closePopup = options.closePopup
@@ -81,7 +81,7 @@ local RecipeWidget = Class(Widget, function (self, options)
     self.root:Hide()
 end)
 
-function RecipeWidget:SetRecipeData(recipeData)
+function Recipe:SetRecipeData(recipeData)
     if not recipeData or not recipeData.recipe then
         self.root:Hide()
 
@@ -119,7 +119,7 @@ function RecipeWidget:SetRecipeData(recipeData)
     for _, ingredient in ipairs(recipe.tech_ingredients) do
         local has = builder:HasTechIngredient(ingredient)
 
-        table.insert(self.ingredients.items, IngredientWidget({
+        table.insert(self.ingredients.items, Ingredient({
             ingredient = ingredient,
             needed = nil,
             onHand = nil,
@@ -132,7 +132,7 @@ function RecipeWidget:SetRecipeData(recipeData)
     for _, ingredient in ipairs(recipe.ingredients) do
         local has, onHand = inventory:Has(ingredient.type, RoundBiasedUp(ingredient.amount * builder:IngredientMod()))
 
-        table.insert(self.ingredients.items, IngredientWidget({
+        table.insert(self.ingredients.items, Ingredient({
             ingredient = ingredient,
             needed = ingredient.amount,
             onHand = onHand,
@@ -145,7 +145,7 @@ function RecipeWidget:SetRecipeData(recipeData)
     for _, ingredient in ipairs(recipe.character_ingredients) do
         local has, amount = builder:HasCharacterIngredient(ingredient)
 
-        table.insert(self.ingredients.items, IngredientWidget({
+        table.insert(self.ingredients.items, Ingredient({
             ingredient = ingredient,
             needed = ingredient.amount,
             onHand = amount,
@@ -285,4 +285,4 @@ function RecipeWidget:SetRecipeData(recipeData)
     end)
 end
 
-return RecipeWidget
+return Recipe

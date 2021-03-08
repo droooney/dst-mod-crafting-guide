@@ -1,3 +1,4 @@
 STRINGS.CRAFTING_GUIDE = {
-    REQUIREMENT_ICONS = {}
+    REQUIREMENT_ICONS = {},
+    TABS = {},
 }

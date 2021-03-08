@@ -2,7 +2,7 @@ local Widget = require("widgets/widget")
 local Screen = require("widgets/screen")
 local ImageButton = require("widgets/imagebutton")
 
-local CraftingWidget = require("./widgets/CraftingWidget")
+local RecipesTab = require("./widgets/RecipesTab")
 
 local Util = require("./Util")
 
@@ -10,11 +10,11 @@ require("constants")
 
 local INITIAL_SCROLL = 1
 
---- CraftingWidgetPopupScreen
+--- Root
 -- @param owner  {Player}  player instance
 -- @param prefab {Prefab}  opened item prefab
-local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
-    Screen._ctor(self, "CraftingWidgetPopupScreen")
+local Root = Class(Screen, function (self, owner, prefab)
+    Screen._ctor(self, "Root")
 
     local overlay = self:AddChild(ImageButton("images/global.xml", "square.tex"))
 
@@ -40,7 +40,7 @@ local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
         scrollY = INITIAL_SCROLL,
     }}
 
-    self.craftingWidget = root:AddChild(CraftingWidget({
+    self.craftingWidget = root:AddChild(RecipesTab({
         owner = owner,
         prefab = prefab,
         closePopup = function () self:Close() end,
@@ -49,11 +49,11 @@ local CraftingWidgetPopupScreen = Class(Screen, function (self, owner, prefab)
     }))
 end)
 
-function CraftingWidgetPopupScreen:Close()
+function Root:Close()
     TheFrontEnd:PopScreen()
 end
 
-function CraftingWidgetPopupScreen:ChooseItem(prefab, scrollYToSave)
+function Root:ChooseItem(prefab, scrollYToSave)
     self.prefabQueue[#self.prefabQueue].scrollY = scrollYToSave
 
     local queueItem = {
@@ -66,7 +66,7 @@ function CraftingWidgetPopupScreen:ChooseItem(prefab, scrollYToSave)
     self.craftingWidget:SetPrefab(queueItem.prefab, queueItem.scrollY)
 end
 
-function CraftingWidgetPopupScreen:NavigateBack()
+function Root:NavigateBack()
     table.remove(self.prefabQueue)
 
     if #self.prefabQueue > 0 then
@@ -78,8 +78,8 @@ function CraftingWidgetPopupScreen:NavigateBack()
     end
 end
 
-function CraftingWidgetPopupScreen:OnControl(control, down)
-    if CraftingWidgetPopupScreen._base.OnControl(self, control, down) then
+function Root:OnControl(control, down)
+    if Root._base.OnControl(self, control, down) then
         return true
     end
 
@@ -93,10 +93,10 @@ function CraftingWidgetPopupScreen:OnControl(control, down)
     return false
 end
 
-function CraftingWidgetPopupScreen:OnUpdate()
+function Root:OnUpdate()
     if self.craftingWidget and self.craftingWidget.OnUpdate then
         self.craftingWidget:OnUpdate()
     end
 end
 
-return CraftingWidgetPopupScreen
+return Root

@@ -1,4 +1,4 @@
-local CraftingWidgetPopupScreen = require("./widgets/CraftingWidgetPopupScreen")
+local Root = require("./widgets/Root")
 local Constants = require("./Constants")
 local Util = require("./Util")
 
@@ -32,7 +32,7 @@ AddClassPostConstruct("widgets/controls", function ()
             Util:Log("inspecting item from inventory: " .. item.prefab)
 
             self.inst:DoTaskInTime(0, function ()
-                Util:GetPlayer().HUD:OpenScreenUnderPause(CraftingWidgetPopupScreen(Util:GetPlayer(), item.prefab))
+                Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer(), item.prefab))
             end)
         end
     end
