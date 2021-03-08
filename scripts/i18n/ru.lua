@@ -5,5 +5,5 @@ STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_SKETCH = "Нужен эски�
 STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_BUILD = "Надо быть около {tech}, чтобы создать этот предмет"
 STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_PROTOTYPE = "Надо быть около {tech}, чтобы создать прототип"
 
-STRINGS.CRAFTING_GUIDE.TABS.GENERAL_INFO = "Информация"
+STRINGS.CRAFTING_GUIDE.TABS.INFO = "Информация"
 STRINGS.CRAFTING_GUIDE.TABS.RECIPES = "Рецепты"

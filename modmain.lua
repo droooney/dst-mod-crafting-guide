@@ -25,14 +25,17 @@ Assets = {
 AddClassPostConstruct("widgets/controls", function ()
     LoadI18N()
 
-    local InventoryReplica = require("components/inventory_replica")
+    local InvSlot = require("widgets/invslot")
 
-    function InventoryReplica:InspectItemFromInvTile(item)
+    function InvSlot:Inspect(item)
+        local item = self.tile.item
+
         if item and item.prefab then
             Util:Log("inspecting item from inventory: " .. item.prefab)
 
             self.inst:DoTaskInTime(0, function ()
                 Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer(), item.prefab))
+                self:ClearFocus()
             end)
         end
     end
