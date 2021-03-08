@@ -136,8 +136,8 @@ function Root:OnControl(control, down)
 end
 
 function Root:OnUpdate()
-    if self.craftingWidget and self.craftingWidget.OnUpdate then
-        self.craftingWidget:OnUpdate()
+    if self.recipesTab and self.recipesTab.OnUpdate then
+        self.recipesTab:OnUpdate()
     end
 end
 
