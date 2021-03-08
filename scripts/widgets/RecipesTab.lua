@@ -17,7 +17,6 @@ local IMPORTANT_EVENTS = {
 -- @param options.owner        {Player}                                     player instance
 -- @param options.prefab       {Prefab}                                     opened item prefab
 -- @param options.chooseItem   {(prefab: Prefab, scrollY: number) => void}  choose item callback
--- @param options.navigateBack {() => void}                                 navigate to prev page
 -- @param options.closePopup   {() => void}                                 close item popup
 local RecipesTab = Class(Widget, function (self, options)
     Widget._ctor(self, "RecipesTab")
@@ -35,9 +34,7 @@ local RecipesTab = Class(Widget, function (self, options)
 
     Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
 
-    local dialog = self.root:AddChild(Templates.RectangleWindow(Constants.ITEM_POPUP_WIDTH, Constants.ITEM_POPUP_HEIGHT))
-
-    self.grid = dialog:AddChild(Templates.ScrollingGrid(self.allRecipes, {
+    self.grid = self.root:AddChild(Templates.ScrollingGrid(self.allRecipes, {
         widget_width = Constants.RECIPE_WIDTH + Constants.RECIPE_SPACING,
         widget_height = Constants.RECIPE_HEIGHT + Constants.RECIPE_SPACING,
         num_visible_rows = Constants.VISIBLE_RECIPES,
@@ -55,8 +52,6 @@ local RecipesTab = Class(Widget, function (self, options)
         scrollbar_offset = (Constants.ITEM_POPUP_WIDTH - Constants.SCROLL_LIST_WIDTH) / 2,
         scrollbar_height_offset = -60
     }))
-
-    self.root:AddChild(Templates.BackButton(options.navigateBack))
 
     local lastHealthSeg = nil
     local lastHealthPenaltySeg = nil

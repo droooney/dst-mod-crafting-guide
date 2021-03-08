@@ -70,7 +70,12 @@ local CUSTOM_PREFAB_ICONS = {
 }
 
 local ItemsGroupingType = {
-    TAB = 'TAB',
+    TAB = "TAB",
+}
+
+local TabKey = {
+    INFO = "INFO",
+    RECIPES = "RECIPES",
 }
 
 local RECIPES_COLUMNS_COUNT = 4
@@ -102,4 +107,5 @@ return {
     SCROLL_LIST_HEIGHT = SCROLL_LIST_HEIGHT,
 
     ItemsGroupingType = ItemsGroupingType,
+    TabKey = TabKey,
 }
