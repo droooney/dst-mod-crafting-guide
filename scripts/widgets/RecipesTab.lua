@@ -118,7 +118,7 @@ function RecipesTab:SetPrefab(prefab, scrollY)
 
     self:SetRecipes()
 
-    Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
+    Util:Log("(update) recipes count for " .. prefab .. ": " .. #self.allRecipes)
 
     self.grid:SetItemsData(self.allRecipes)
 
