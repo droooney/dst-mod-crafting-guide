@@ -14,10 +14,9 @@ require("mathutil")
 require("strings")
 require("widgets/widgetutil")
 
-local INGREDIENT_SIZE = 55
-local INGREDIENT_SPACING = 3
+local INGREDIENT_SIZE = 45
 
-local REQUIREMENT_SIZE = 25
+local REQUIREMENT_SIZE = 20
 local REQUIREMENT_SPACING = 2
 
 --- Recipe
@@ -33,9 +32,9 @@ local Recipe = Class(Widget, function (self, options)
     self.root = self:AddChild(Widget("root"))
     self.rootButton = self.root:AddChild(ImageButton("images/plantregistry.xml", "plant_entry.tex", "plant_entry_focus.tex"))
     self.recipeItemBg = self.rootButton:AddChild(Image("images/plantregistry.xml", "plant_entry_active.tex"))
-    self.name = self.rootButton:AddChild(Text(UIFONT, 28))
+    self.name = self.rootButton:AddChild(Text(UIFONT, 22))
     self.recipeImage = self.rootButton:AddChild(Image())
-    self.craftedCount = self.rootButton:AddChild(Text(UIFONT, 32))
+    self.craftedCount = self.rootButton:AddChild(Text(UIFONT, 28))
     self.ingredients = self.rootButton:AddChild(Widget("ingredients"))
     self.requirements = self.rootButton:AddChild(Widget("requirements"))
     self.craftButton = self.rootButton:AddChild(ImageButton())
@@ -43,18 +42,17 @@ local Recipe = Class(Widget, function (self, options)
     self.ingredients.items = {}
     self.requirements.items = {}
 
-    self.recipeItemBg:SetScale(1.25, 1.25, 1.25)
-
-    self.name:SetPosition(0, 100, 0)
+    self.name:SetPosition(0, 85, 0)
     self.name:SetHAlign(ANCHOR_MIDDLE)
 
-    self.recipeImage:SetPosition(0, 47, 0)
-    self.craftedCount:SetPosition(30, 25, 0)
+    self.recipeImage:SetScale(0.8)
+    self.recipeImage:SetPosition(0, 40, 0)
+    self.craftedCount:SetPosition(30, 20, 0)
     self.ingredients:SetPosition(0, -20, 0)
-    self.requirements:SetPosition(0, -70, 0)
+    self.requirements:SetPosition(0, -60, 0)
 
-    self.craftButton:SetScale(0.7, 0.7, 0.7)
-    self.craftButton:SetPosition(0, -110, 0)
+    self.craftButton:SetScale(0.56)
+    self.craftButton:SetPosition(0, -90, 0)
 
     local _OnControl = self.rootButton.OnControl
 
@@ -161,7 +159,7 @@ function Recipe:SetRecipeData(recipeData)
         STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TAB,
         { tab = STRINGS.TABS[recipe.tab.str] }
     ))
-    tabIcon:SetScale(1.1, 1.1, 1.1)
+    tabIcon:SetScale(1.1)
 
     table.insert(self.requirements.items, tabIcon)
 
@@ -173,7 +171,7 @@ function Recipe:SetRecipeData(recipeData)
             STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_CHARACTER,
             { character = Util:GetPrefabString(charName) }
         ))
-        avatarIcon:SetScale(1.2, 1.2, 1.2)
+        avatarIcon:SetScale(1.2)
 
         table.insert(self.requirements.items, avatarIcon)
     end
@@ -249,7 +247,7 @@ function Recipe:SetRecipeData(recipeData)
 
     for i, ingredient in ipairs(self.ingredients.items) do
         self.ingredients:AddChild(ingredient)
-        ingredient:SetPosition((i - (#self.ingredients.items + 1) / 2) * (INGREDIENT_SIZE + INGREDIENT_SPACING), 0, 0)
+        ingredient:SetPosition((i - (#self.ingredients.items + 1) / 2) * INGREDIENT_SIZE, 0, 0)
     end
 
     for i, requirement in ipairs(self.requirements.items) do

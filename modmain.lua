@@ -19,7 +19,7 @@ function LoadI18N()
 end
 
 Assets = {
-    Asset("ATLAS", Constants.CUSTOM_ICONS_ATLAS),
+    Asset("ATLAS", "images/icons.xml"),
 }
 
 AddClassPostConstruct("widgets/controls", function ()

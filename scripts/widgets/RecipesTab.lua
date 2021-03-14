@@ -49,8 +49,8 @@ local RecipesTab = Class(Widget, function (self, options)
         apply_fn = function (context, recipeWidget, recipeData)
             recipeWidget:SetRecipeData(recipeData)
         end,
-        scrollbar_offset = (Constants.ITEM_POPUP_WIDTH - Constants.SCROLL_LIST_WIDTH) / 2,
-        scrollbar_height_offset = -60
+        scrollbar_offset = 70,
+        scrollbar_height_offset = -60,
     }))
 
     local lastHealthSeg = nil

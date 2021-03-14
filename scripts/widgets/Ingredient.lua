@@ -8,13 +8,6 @@ local IngredientUI = require("widgets/ingredientui")
 
 local Util = require("./Util")
 
-local RECIPE_WIDTH = 200
-local RECIPE_HEIGHT = 290
-local RECIPE_SPACING = 5
-
-local INGREDIENT_SIZE = 55
-local INGREDIENT_SPACING = 3
-
 local Ingredient = Class(Widget, function (self, options)
     Widget._ctor(self, "Ingredient")
 
@@ -27,7 +20,7 @@ local Ingredient = Class(Widget, function (self, options)
         ingredient:GetAtlas(), ingredient:GetImage(), options.needed, options.onHand,
         options.has, prefabName, Util:GetPlayer(), ingredient.type
     ))
-    self.ingredientUI:SetScale(0.8, 0.8, 0.8)
+    self.ingredientUI:SetScale(0.64)
 
     self:SetHoverText(prefabName)
 

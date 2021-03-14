@@ -37,7 +37,7 @@ local Root = Class(Screen, function (self, owner, prefab)
     self.overlay:SetOnClick(function () self:Close() end)
     self.overlay:SetHelpTextMessage("")
 
-    self.dialog.top:Hide()
+    -- self.dialog.top:Hide()
 
     self.root:SetScaleMode(SCALEMODE_PROPORTIONAL)
     self.root:SetHAnchor(ANCHOR_MIDDLE)
@@ -80,6 +80,8 @@ function Root:BuildTabButtons(subscreener)
     self.tabButtons:SetPosition(0, Constants.ITEM_POPUP_HEIGHT / 2 + 27)
     self.tabButtons:MoveToBack()
 
+    self.tabButtons:Hide()
+
     return self.tabButtons.menu
 end
 
@@ -102,6 +104,7 @@ function Root:ChooseUpperQueueItem()
     local queueItem = self.prefabQueue[#self.prefabQueue]
 
     self:ChooseTab(queueItem.activeTab)
+    self.generalInfoTab:SetPrefab(queueItem.prefab)
     self.recipesTab:SetPrefab(queueItem.prefab, queueItem.scrollY)
 end
 
@@ -135,9 +138,9 @@ function Root:OnControl(control, down)
     return false
 end
 
-function Root:OnUpdate()
+function Root:OnUpdate(...)
     if self.recipesTab and self.recipesTab.OnUpdate then
-        self.recipesTab:OnUpdate()
+        self.recipesTab:OnUpdate(...)
     end
 end
 
