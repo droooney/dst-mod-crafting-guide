@@ -79,6 +79,8 @@ local Recipe = Class(Widget, function (self, options)
     self.root:Hide()
 end)
 
+-- FIXME: when recipes in one row the position is off
+
 function Recipe:SetRecipeData(recipeData)
     if not recipeData or not recipeData.recipe then
         self.root:Hide()
