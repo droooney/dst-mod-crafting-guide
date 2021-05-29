@@ -58,15 +58,12 @@ function Tabs:AddTabs(tabs)
         button:SetHoverText(STRINGS.TABS[tab.str])
 
         button:SetOnClick(function ()
-            if i == self.selectedTabIndex then
-                return
-            end
-
             self:SelectTab(i)
             self.switchTab(i)
         end)
 
         if i == self.selectedTabIndex then
+            button:Disable()
             button.defaultBg:Hide()
         else
             button.selectedBg:Hide()
@@ -75,11 +72,16 @@ function Tabs:AddTabs(tabs)
 end
 
 function Tabs:SelectTab(index)
-    self.tabsWidget.tabs[self.selectedTabIndex].selectedBg:Hide()
-    self.tabsWidget.tabs[self.selectedTabIndex].defaultBg:Show()
+    local prevActiveTab = self.tabsWidget.tabs[self.selectedTabIndex]
+    local newActiveTab = self.tabsWidget.tabs[index]
 
-    self.tabsWidget.tabs[index].selectedBg:Show()
-    self.tabsWidget.tabs[index].defaultBg:Hide()
+    prevActiveTab:Enable()
+    prevActiveTab.selectedBg:Hide()
+    prevActiveTab.defaultBg:Show()
+
+    newActiveTab:Disable()
+    newActiveTab.selectedBg:Show()
+    newActiveTab.defaultBg:Hide()
 
     self.selectedTabIndex = index
 end

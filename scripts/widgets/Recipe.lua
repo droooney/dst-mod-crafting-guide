@@ -59,7 +59,9 @@ local Recipe = Class(Widget, function (self, options)
     local _OnControl = self.rootButton.OnControl
 
     self.rootButton.OnControl = function (_, control, down)
-        -- TODO: don't pass scroll controls (or rather pass only left button controls)
+        if control ~= CONTROL_ACCEPT then
+            return _OnControl(_, control, down)
+        end
 
         if self.craftButton.focus then
             self.craftButton:OnControl(control, down)
