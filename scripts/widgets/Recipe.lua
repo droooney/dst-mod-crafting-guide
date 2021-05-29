@@ -21,12 +21,14 @@ local REQUIREMENT_SPACING = 2
 
 --- Recipe
 -- @param options.owner      {Player}                    player instance
+-- @param options.pagePrefab {Prefab}                    page prefab
 -- @param options.closePopup {() => void}                close item popup
 -- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
 local Recipe = Class(Widget, function (self, options)
     Widget._ctor(self, "Recipe")
 
     self.owner = options.owner
+    self.pagePrefab = options.pagePrefab
     self.closePopup = options.closePopup
     self.chooseItem = options.chooseItem
     self.root = self:AddChild(Widget("root"))
@@ -79,17 +81,12 @@ local Recipe = Class(Widget, function (self, options)
     self.root:Hide()
 end)
 
--- FIXME: when recipes in one row the position is off
-
-function Recipe:SetRecipeData(recipeData)
-    if not recipeData or not recipeData.recipe then
+function Recipe:SetRecipeData(recipe)
+    if not recipe then
         self.root:Hide()
 
         return
     end
-
-    local recipe = recipeData.recipe
-    local pagePrefab = recipeData.pagePrefab
 
     local builder = self.owner.replica.builder
     local inventory = self.owner.replica.inventory
@@ -98,6 +95,7 @@ function Recipe:SetRecipeData(recipeData)
     local canBuild = builder:CanBuild(recipe.name)
     local canLearn = builder:CanLearn(recipe.name)
     local techLevel = builder:GetTechTrees()
+    local techBonuses = builder:GetTechBonuses()
     local shouldHint = not knows and not (canLearn and CanPrototypeRecipe(recipe.level, techLevel))
 
     self.root:Show()
@@ -124,7 +122,7 @@ function Recipe:SetRecipeData(recipeData)
             needed = nil,
             onHand = nil,
             has = has,
-            disabled = ingredient.type == pagePrefab,
+            disabled = ingredient.type == self.pagePrefab,
             chooseItem = self.chooseItem,
         }))
     end
@@ -137,7 +135,7 @@ function Recipe:SetRecipeData(recipeData)
             needed = ingredient.amount,
             onHand = onHand,
             has = has,
-            disabled = ingredient.type == pagePrefab,
+            disabled = ingredient.type == self.pagePrefab,
             chooseItem = self.chooseItem,
         }))
     end
@@ -150,7 +148,7 @@ function Recipe:SetRecipeData(recipeData)
             needed = ingredient.amount,
             onHand = amount,
             has = has,
-            disabled = ingredient.type == pagePrefab,
+            disabled = ingredient.type == self.pagePrefab,
             chooseItem = self.chooseItem,
         }))
     end
@@ -205,7 +203,7 @@ function Recipe:SetRecipeData(recipeData)
             techPrefab = Constants.REQUIRED_TECH.SCULPTING_1
         else
             for tech, value in pairs(recipe.level) do
-                -- FIXME: fix science for wickerbottom
+                value = value - (techBonuses[tech] or 0)
 
                 techPrefab = Constants.REQUIRED_TECH[tech .. "_" .. value]
 

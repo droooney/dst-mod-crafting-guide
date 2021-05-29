@@ -1,7 +1,9 @@
 local Widget = require("widgets/widget")
 local Templates = require("widgets/redux/templates")
+local Text = require("widgets/text")
 
 local Recipe = require("./widgets/Recipe")
+local Tabs = require("./widgets/Tabs")
 
 local Constants = require("./Constants")
 local Util = require("./Util")
@@ -14,44 +16,23 @@ local IMPORTANT_EVENTS = {
 }
 
 --- RecipesTab
--- @param options.owner        {Player}                                     player instance
--- @param options.prefab       {Prefab}                                     opened item prefab
--- @param options.chooseItem   {(prefab: Prefab, scrollY: number) => void}  choose item callback
--- @param options.closePopup   {() => void}                                 close item popup
+-- ChooseItem {(prefab: Prefab, scrollY: number, selectedTabIndex: number) => void}
+-- @param options.owner        {Player}      player instance
+-- @param options.prefab       {Prefab}      opened item prefab
+-- @param options.chooseItem   {ChooseItem}  choose item callback
+-- @param options.closePopup   {() => void}  close item popup
 local RecipesTab = Class(Widget, function (self, options)
     Widget._ctor(self, "RecipesTab")
 
     local owner = options.owner
-    local prefab = options.prefab
 
-    self.prefab = prefab
     self.owner = options.owner
     self.chooseItem = options.chooseItem
+    self.closePopup = options.closePopup
     self.needToUpdateRecipes = false
     self.root = self:AddChild(Widget("root"))
 
-    self:SetRecipes()
-
-    Util:Log("recipes count for " .. prefab .. ": " .. #self.allRecipes)
-
-    self.grid = self.root:AddChild(Templates.ScrollingGrid(self.allRecipes, {
-        widget_width = Constants.RECIPE_WIDTH + Constants.RECIPE_SPACING,
-        widget_height = Constants.RECIPE_HEIGHT + Constants.RECIPE_SPACING,
-        num_visible_rows = Constants.VISIBLE_RECIPES,
-        num_columns = Constants.RECIPES_COLUMNS_COUNT,
-        item_ctor_fn = function ()
-            return Recipe({
-                owner = owner,
-                closePopup = options.closePopup,
-                chooseItem = function (...) self:ChooseItem(...) end,
-            })
-        end,
-        apply_fn = function (context, recipeWidget, recipeData)
-            recipeWidget:SetRecipeData(recipeData)
-        end,
-        scrollbar_offset = 70,
-        scrollbar_height_offset = -60,
-    }))
+    self:SetPrefab(options.prefab, 1, 1)
 
     local lastHealthSeg = nil
     local lastHealthPenaltySeg = nil
@@ -96,45 +77,106 @@ local RecipesTab = Class(Widget, function (self, options)
     end
 end)
 
-function RecipesTab:ChooseItem(prefab)
-    self.chooseItem(prefab, self.grid.current_scroll_pos)
+function RecipesTab:CreateTabs()
+    if self.tabs then
+        self.tabs:Kill()
+    end
+
+    local tabs = {}
+
+    for _, group in ipairs(self.allRecipes) do
+        table.insert(tabs, group.tab)
+    end
+
+    self.tabs = self.root:AddChild(Tabs({
+        owner = self.owner,
+        tabs = tabs,
+        selectedTabIndex = self.selectedTabIndex,
+        switchTab = function (...) self:SwitchTab(...) end,
+    }))
+
+    self.tabs:SetPosition(-425, 203)
 end
 
-function RecipesTab:SetRecipes()
-    local recipes = Util:GetAllRecipes(self.prefab)
+function RecipesTab:CreateGrid()
+    local recipes = self.allRecipes[self.selectedTabIndex].recipes
 
-    self.allRecipes = {}
+    self.grid = self.root:AddChild(Templates.ScrollingGrid(recipes, {
+        widget_width = Constants.RECIPE_WIDTH + Constants.RECIPE_SPACING,
+        widget_height = Constants.RECIPE_HEIGHT + Constants.RECIPE_SPACING,
+        num_visible_rows = #recipes > 3
+            and Constants.VISIBLE_RECIPES_MORE_ROWS
+            or Constants.VISIBLE_RECIPES_ONE_ROW,
+        num_columns = Constants.RECIPES_COLUMNS_COUNT,
+        item_ctor_fn = function ()
+            return Recipe({
+                owner = self.owner,
+                pagePrefab = self.prefab,
+                closePopup = self.closePopup,
+                chooseItem = function (...) self:ChooseItem(...) end,
+            })
+        end,
+        apply_fn = function (context, recipeWidget, recipe)
+            recipeWidget:SetRecipeData(recipe)
+        end,
+        scrollbar_offset = 70,
+        scrollbar_height_offset = -60,
+    }))
 
-    for _, recipe in ipairs(recipes) do
-        table.insert(self.allRecipes, {
-            recipe = recipe,
-            pagePrefab = self.prefab,
-        })
+    self.grid:SetItemsData(recipes)
+end
+
+function RecipesTab:ShowRecipes()
+    if self.grid then
+        self.grid:Kill()
+
+        self.grid = nil
+    end
+
+    if self.noRecipes then
+        self.noRecipes:Kill()
+    end
+
+    if #self.allRecipes == 0 then
+        self.noRecipes = self.root:AddChild(Text(NEWFONT, 60, STRINGS.CRAFTING_GUIDE.NO_RECIPES))
+    else
+        self:CreateGrid()
     end
 end
 
-function RecipesTab:SetPrefab(prefab, scrollY)
+function RecipesTab:SwitchTab(tabIndex)
+    self.selectedTabIndex = tabIndex
+
+    self:ShowRecipes()
+end
+
+function RecipesTab:ChooseItem(prefab)
+    self.chooseItem(prefab, self.grid.current_scroll_pos, self.selectedTabIndex)
+end
+
+function RecipesTab:SetPrefab(prefab, scrollY, selectedTabIndex)
     self.prefab = prefab
+    self.selectedTabIndex = selectedTabIndex
+    self.allRecipes = Util:GetAllRecipesGrouped(prefab, Constants.ItemsGroupingType.TAB)
 
-    self:SetRecipes()
+    self:CreateTabs()
+    self:ShowRecipes()
 
-    Util:Log("(update) recipes count for " .. prefab .. ": " .. #self.allRecipes)
+    if self.grid then
+        self.grid.target_scroll_pos = scrollY
+        self.grid.current_scroll_pos = scrollY
 
-    self.grid:SetItemsData(self.allRecipes)
-
-    self.grid.target_scroll_pos = scrollY
-    self.grid.current_scroll_pos = scrollY
-
-    self.grid:RefreshView()
+        self.grid:RefreshView()
+    end
 end
 
 function RecipesTab:OnUpdate()
     if self.needToUpdateRecipes then
-        Util:Log("updating recipes")
-
         self.needToUpdateRecipes = false
 
-        self.grid:RefreshView()
+        if self.grid then
+            self.grid:RefreshView()
+        end
     end
 end
 

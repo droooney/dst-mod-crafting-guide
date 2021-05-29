@@ -68,6 +68,10 @@ return {
             end
         end
 
+        table.sort(recipes, function (recipe1, recipe2)
+            return recipe1.sortkey < recipe2.sortkey
+        end)
+
         return recipes
     end,
 
@@ -75,32 +79,34 @@ return {
         local recipes = self:GetAllRecipes(prefab)
         local groupsMap = {}
         local groups = {}
+        local isTabGrouping = groupingType == Constants.ItemsGroupingType.TAB
 
         for _, recipe in ipairs(recipes) do
             local groupKey
 
-            if groupingType == Constants.ItemsGroupingType.TAB then
+            if isTabGrouping then
                 groupKey = recipe.tab.str
             end
 
             groupsMap[groupKey] = groupsMap[groupKey] or {
                 recipes = {},
-                title = STRINGS.TABS[recipe.tab.str],
-                image = nil,
+                tab = recipe.tab,
             }
 
             table.insert(groupsMap[groupKey].recipes, recipe)
         end
 
-        if groupingType == Constants.ItemsGroupingType.TAB then
-            for _, tab in pairs(RECIPETABS) do
-                local group = groupsMap[tab.str]
-
-                if group then
-                    table.insert(groups, group)
-                end
-            end
+        for _, group in pairs(groupsMap) do
+            table.insert(groups, group)
         end
+
+        table.sort(groups, function (group1, group2)
+            if isTabGrouping then
+                return group1.tab.sort < group2.tab.sort
+            end
+
+            return true
+        end)
 
         return groups
     end,
@@ -115,5 +121,5 @@ return {
 
     GetReplacedString = function (self, template, replacements)
         return subfmt(template, replacements)
-    end
+    end,
 }

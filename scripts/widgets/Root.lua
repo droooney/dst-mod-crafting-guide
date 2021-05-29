@@ -14,6 +14,7 @@ local Util = require("./Util")
 require("constants")
 
 local INITIAL_SCROLL = 1
+local INITIAL_TAB_INDEX = 1
 -- local DEFAULT_TAB = Constants.TabKey.INFO
 local DEFAULT_TAB = Constants.TabKey.RECIPES
 
@@ -66,6 +67,7 @@ function Root:AddQueueItem(prefab)
         prefab = prefab,
         activeTab = DEFAULT_TAB,
         scrollY = INITIAL_SCROLL,
+        selectedTabIndex = INITIAL_TAB_INDEX,
     })
 
     self:ChooseUpperQueueItem()
@@ -89,8 +91,9 @@ function Root:Close()
     TheFrontEnd:PopScreen()
 end
 
-function Root:ChooseItem(prefab, scrollYToSave)
+function Root:ChooseItem(prefab, scrollYToSave, selectedTabIndex)
     self.prefabQueue[#self.prefabQueue].scrollY = scrollYToSave
+    self.prefabQueue[#self.prefabQueue].selectedTabIndex = selectedTabIndex
     self.prefabQueue[#self.prefabQueue].activeTab = self.subscreener.active_key
 
     self:AddQueueItem(prefab)
@@ -105,7 +108,7 @@ function Root:ChooseUpperQueueItem()
 
     self:ChooseTab(queueItem.activeTab)
     self.generalInfoTab:SetPrefab(queueItem.prefab)
-    self.recipesTab:SetPrefab(queueItem.prefab, queueItem.scrollY)
+    self.recipesTab:SetPrefab(queueItem.prefab, queueItem.scrollY, queueItem.selectedTabIndex)
 end
 
 function Root:NavigateBack()
