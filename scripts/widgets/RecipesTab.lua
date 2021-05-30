@@ -1,6 +1,7 @@
 local Widget = require("widgets/widget")
 local Templates = require("widgets/redux/templates")
 local Text = require("widgets/text")
+local ImageButton = require("widgets/imagebutton")
 
 local Recipe = require("./widgets/Recipe")
 local Tabs = require("./widgets/Tabs")
@@ -9,6 +10,7 @@ local Constants = require("./Constants")
 local Util = require("./Util")
 
 require("constants")
+require("strings")
 
 local IMPORTANT_EVENTS = {
     "techtreechange", "itemget", "itemlose", "newactiveitem",
@@ -31,6 +33,12 @@ local RecipesTab = Class(Widget, function (self, options)
     self.closePopup = options.closePopup
     self.needToUpdateRecipes = false
     self.root = self:AddChild(Widget("root"))
+
+    self.settingsButton = self.root:AddChild(ImageButton())
+    self.settingsButton:SetText(STRINGS.CRAFTING_GUIDE.SETTINGS)
+    self.settingsButton:SetOnClick(function () self:OpenSettings() end)
+    self.settingsButton:SetScale(0.6)
+    self.settingsButton:SetPosition(-400, -220)
 
     self:SetPrefab(options.prefab, 1, 1)
 
@@ -168,6 +176,10 @@ function RecipesTab:SetPrefab(prefab, scrollY, selectedTabIndex)
 
         self.grid:RefreshView()
     end
+end
+
+function RecipesTab:OpenSettings()
+
 end
 
 function RecipesTab:OnUpdate()
