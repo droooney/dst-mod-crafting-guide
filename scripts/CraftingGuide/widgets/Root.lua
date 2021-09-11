@@ -5,11 +5,11 @@ local HeaderTabs = require("widgets/redux/headertabs")
 local Subscreener = require("screens/redux/subscreener")
 local Templates = require("widgets/redux/templates")
 
-local GeneralInfoTab = require("./widgets/GeneralInfoTab")
-local RecipesTab = require("./widgets/RecipesTab")
+local GeneralInfoTab = require("CraftingGuide/widgets/GeneralInfoTab")
+local RecipesTab = require("CraftingGuide/widgets/RecipesTab")
 
-local Constants = require("./Constants")
-local Util = require("./Util")
+local Constants = require("CraftingGuide/Constants")
+local Util = require("CraftingGuide/Util")
 
 require("constants")
 

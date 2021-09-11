@@ -3,11 +3,11 @@ local Templates = require("widgets/redux/templates")
 local Text = require("widgets/text")
 local ImageButton = require("widgets/imagebutton")
 
-local Recipe = require("./widgets/Recipe")
-local Tabs = require("./widgets/Tabs")
+local Recipe = require("CraftingGuide/widgets/Recipe")
+local Tabs = require("CraftingGuide/widgets/Tabs")
 
-local Constants = require("./Constants")
-local Util = require("./Util")
+local Constants = require("CraftingGuide/Constants")
+local Util = require("CraftingGuide/Util")
 
 require("constants")
 require("strings")

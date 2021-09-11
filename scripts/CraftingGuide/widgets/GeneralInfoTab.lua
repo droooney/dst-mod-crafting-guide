@@ -3,8 +3,8 @@ local UIAnim = require("widgets/uianim")
 local Image = require("widgets/image")
 local Text = require("widgets/text")
 
-local Constants = require("./Constants")
-local Util = require("./Util")
+local Constants = require("CraftingGuide/Constants")
+local Util = require("CraftingGuide/Util")
 
 require("constants")
 require("fonts")

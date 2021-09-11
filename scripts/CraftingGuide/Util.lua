@@ -1,6 +1,6 @@
 local inspect = require("inspect")
 
-local Constants = require("./Constants")
+local Constants = require("CraftingGuide/Constants")
 
 require("constants")
 require("strings")

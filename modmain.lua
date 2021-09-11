@@ -1,9 +1,9 @@
-local Root = require("./widgets/Root")
-local Constants = require("./Constants")
-local Util = require("./Util")
+local Root = require("CraftingGuide/widgets/Root")
+local Constants = require("CraftingGuide/Constants")
+local Util = require("CraftingGuide/Util")
 
-require("./i18n/common")
-require("./i18n/en")
+require("CraftingGuide/i18n/common")
+require("CraftingGuide/i18n/en")
 
 local SUPPORTED_LANGUAGES = {
     en = true,
@@ -14,12 +14,12 @@ function LoadI18N()
     local lang = GLOBAL.LanguageTranslator.defaultlang or nil
 
     if lang and SUPPORTED_LANGUAGES[lang] then
-        require("./i18n/" .. lang)
+        require("CraftingGuide/i18n/" .. lang)
     end
 end
 
 Assets = {
-    Asset("ATLAS", "images/icons.xml"),
+    Asset("ATLAS", "images/CraftingGuide/icons.xml"),
 }
 
 AddClassPostConstruct("widgets/controls", function ()
@@ -28,7 +28,7 @@ AddClassPostConstruct("widgets/controls", function ()
     local InvSlot = require("widgets/invslot")
 
     function InvSlot:Inspect(item)
-        local item = self.tile.item
+        local item = self.tile and self.tile.item
 
         if item and item.prefab then
             Util:Log("inspecting item from inventory: " .. item.prefab)

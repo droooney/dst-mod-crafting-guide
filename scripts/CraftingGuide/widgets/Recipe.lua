@@ -3,10 +3,10 @@ local Image = require("widgets/image")
 local ImageButton = require("widgets/imagebutton")
 local Text = require("widgets/text")
 
-local Ingredient = require("./widgets/Ingredient")
+local Ingredient = require("CraftingGuide/widgets/Ingredient")
 
-local Constants = require("./Constants")
-local Util = require("./Util")
+local Constants = require("CraftingGuide/Constants")
+local Util = require("CraftingGuide/Util")
 
 require("constants")
 require("fonts")

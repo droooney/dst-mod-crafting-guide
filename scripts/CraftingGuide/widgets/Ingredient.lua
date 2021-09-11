@@ -6,7 +6,7 @@ local Button = require("widgets/button")
 local Text = require("widgets/text")
 local IngredientUI = require("widgets/ingredientui")
 
-local Util = require("./Util")
+local Util = require("CraftingGuide/Util")
 
 local Ingredient = Class(Widget, function (self, options)
     Widget._ctor(self, "Ingredient")

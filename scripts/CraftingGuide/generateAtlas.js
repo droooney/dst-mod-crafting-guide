@@ -25,4 +25,4 @@ const atlasContents = `<Atlas>
 </Atlas>
 `;
 
-fs.writeFileSync(path.resolve('./images/icons.xml'), atlasContents);
+fs.writeFileSync(path.resolve('./images/CraftingGuide/icons.xml'), atlasContents);
