@@ -59,7 +59,7 @@ local REQUIRED_TECH = {
     -- TODO: add support for fishing, offerings
 }
 
-local CUSTOM_ICONS_ATLAS = resolvefilepath("images/icons.xml")
+local CUSTOM_ICONS_ATLAS = resolvefilepath("images/CraftingGuide/icons.xml")
 
 local CUSTOM_PREFAB_ICONS = {
     hermitcrab = true,
