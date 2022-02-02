@@ -52,25 +52,15 @@ return {
 
         for _, recipe in pairs(AllRecipes) do
             if recipe.tab then
-                local ingredientsMatch = function (ingredients)
-                    local matches = false
+                local matches = false
 
-                    for _, ingredient in ipairs(recipe.ingredients) do
-                        if ingredient.type == prefab then
-                            matches = true
+                for _, ingredient in ipairs(ingredients) do
+                    if ingredient.type == prefab then
+                        matches = true
 
-                            break
-                        end
+                        break
                     end
-
-                    return matches
                 end
-
-                local matches = (
-                    ingredientsMatch(recipe.ingredients)
-                    or ingredientsMatch(recipe.tech_ingredients)
-                    or ingredientsMatch(recipe.character_ingredients)
-                )
 
                 if matches then
                     table.insert(recipes, recipe)

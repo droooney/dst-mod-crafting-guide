@@ -42,10 +42,10 @@ local RecipesTab = Class(Widget, function (self, options)
 
     self:SetPrefab(options.prefab, 1, 1)
 
-    local lastHealthSeg = nil
-    local lastHealthPenaltySeg = nil
-    local lastSanitySeg = nil
-    local lastSanityPenaltySeg = nil
+    local lastHealthSeg
+    local lastHealthPenaltySeg
+    local lastSanitySeg
+    local lastSanityPenaltySeg
 
     local function OnHealthDeltaChange(owner, data)
         local health = owner.replica.health

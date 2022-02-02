@@ -1,5 +1,4 @@
 local Root = require("CraftingGuide/widgets/Root")
-local Constants = require("CraftingGuide/Constants")
 local Util = require("CraftingGuide/Util")
 
 require("CraftingGuide/i18n/common")
@@ -27,7 +26,7 @@ AddClassPostConstruct("widgets/controls", function ()
 
     local InvSlot = require("widgets/invslot")
 
-    function InvSlot:Inspect(item)
+    function InvSlot:Inspect()
         local item = self.tile and self.tile.item
 
         if item and item.prefab then

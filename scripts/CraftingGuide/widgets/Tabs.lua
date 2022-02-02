@@ -62,7 +62,7 @@ local Tabs = Class(Widget, function (self, options)
     self:AddTabs()
 end)
 
-function Tabs:AddTabs(tabs)
+function Tabs:AddTabs()
     for i, tab in ipairs(self.tabs) do
         local j = i - 1
         local button = self.tabsWidget:AddChild(Button())
