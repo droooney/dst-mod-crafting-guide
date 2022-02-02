@@ -20,10 +20,10 @@ local IMPORTANT_EVENTS = {
 
 --- RecipesTab
 -- ChooseItem {(prefab: Prefab, scrollY: number, selectedTabIndex: number) => void}
--- @param options.owner        {Player}      player instance
--- @param options.prefab       {Prefab}      opened item prefab
--- @param options.chooseItem   {ChooseItem}  choose item callback
--- @param options.closePopup   {() => void}  close item popup
+-- @param options.owner      {Player}      player instance
+-- @param options.prefab     {Prefab}      opened item prefab
+-- @param options.chooseItem {ChooseItem}  choose item callback
+-- @param options.closePopup {() => void}  close item popup
 local RecipesTab = Class(Widget, function (self, options)
     Widget._ctor(self, "RecipesTab")
 

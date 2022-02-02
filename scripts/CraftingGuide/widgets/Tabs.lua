@@ -29,10 +29,10 @@ local BUTTON_SETTINGS = {
 }
 
 --- Tabs
--- @param options.owner             {Player}                      player instance
--- @param options.tabs              {RecipeTab[]}                 tabs array
--- @param options.selectedTabIndex  {number}                      selected tab index
--- @param options.switchTab         {(tabIndex: number) => void}  switch tab callbackd
+-- @param options.owner            {Player}                      player instance
+-- @param options.tabs             {RecipeTab[]}                 tabs array
+-- @param options.selectedTabIndex {number}                      selected tab index
+-- @param options.switchTab        {(tabIndex: number) => void}  switch tab callbackd
 local Tabs = Class(Widget, function (self, options)
     Widget._ctor(self, "Tabs")
 
