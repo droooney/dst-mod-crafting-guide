@@ -1,13 +1,16 @@
 local Widget = require("widgets/widget")
-local Templates = require("widgets/redux/templates")
-local RecipePopup = require("widgets/recipepopup")
-local Image = require("widgets/image")
 local Button = require("widgets/button")
-local Text = require("widgets/text")
 local IngredientUI = require("widgets/ingredientui")
 
 local Util = require("CraftingGuide/Util")
 
+--- Ingredient
+-- @param options.ingredient {Ingredient}                ingredient instance
+-- @param options.needed     {number | nil}              needed amount
+-- @param options.onHand     {number | nil}              amount on hand
+-- @param options.has        {boolean}                   if amount is enough
+-- @param options.disabled   {boolean}                   is button disabled
+-- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
 local Ingredient = Class(Widget, function (self, options)
     Widget._ctor(self, "Ingredient")
 
@@ -17,7 +20,7 @@ local Ingredient = Class(Widget, function (self, options)
     self.root = self:AddChild(Widget("root"))
     self.rootButton = self:AddChild(Button())
     self.ingredientUI = self.rootButton:AddChild(IngredientUI(
-        ingredient:GetAtlas(), ingredient:GetImage(), options.needed, options.onHand,
+        ingredient:GetAtlas(), ingredient:GetImage(), options.needed ~= 0 and options.needed or nil, options.onHand,
         options.has, prefabName, Util:GetPlayer(), ingredient.type
     ))
     self.ingredientUI:SetScale(0.64)

@@ -29,6 +29,7 @@ local REQUIRED_TECH = {
     ANCIENT_4 = "ancient_altar",
 
     CELESTIAL_1 = "moonrockseed",
+    CELESTIAL_3 = "moon_altar",
 
     MOON_ALTAR_2 = "moon_altar",
 

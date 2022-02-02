@@ -124,7 +124,7 @@ function Recipe:SetRecipeData(recipe)
             needed = nil,
             onHand = nil,
             has = has,
-            disabled = ingredient.type == self.pagePrefab,
+            disabled = true,
             chooseItem = self.chooseItem,
         }))
     end
@@ -150,7 +150,7 @@ function Recipe:SetRecipeData(recipe)
             needed = ingredient.amount,
             onHand = amount,
             has = has,
-            disabled = ingredient.type == self.pagePrefab,
+            disabled = true,
             chooseItem = self.chooseItem,
         }))
     end
@@ -230,7 +230,7 @@ function Recipe:SetRecipeData(recipe)
 
             if techPrefab == "moon_altar" then
                 techString = (
-                    STRINGS.NAMES.MOON_ALTAR.MOON_ALTAR
+                    STRINGS.NAMES.MOON_ALTAR
                     .. "/" .. STRINGS.NAMES.MOON_ALTAR_COSMIC
                     .. "/" .. STRINGS.NAMES.MOON_ALTAR_ASTRAL
                 )
