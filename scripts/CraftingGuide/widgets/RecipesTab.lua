@@ -103,7 +103,7 @@ function RecipesTab:CreateTabs()
         switchTab = function (...) self:SwitchTab(...) end,
     }))
 
-    self.tabs:SetPosition(-425, 203)
+    self.tabs:SetPosition(-402, 227)
 end
 
 function RecipesTab:CreateGrid()

@@ -31,6 +31,16 @@ return {
         end
     end,
 
+    FindIndex = function (self, array, cb)
+        for i, v in ipairs(array) do
+            if cb(v, i, array) then
+                return i
+            end
+        end
+
+        return 0
+    end,
+
     GetInventoryItemAtlas = function (self, itemTex)
         return self.IsDST
             and GetInventoryItemAtlas(itemTex)

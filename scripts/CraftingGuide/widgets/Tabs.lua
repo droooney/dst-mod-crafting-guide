@@ -2,15 +2,31 @@ local Widget = require("widgets/widget")
 local Image = require("widgets/image")
 local Button = require("widgets/button")
 
-local Constants = require("CraftingGuide/Constants")
 local Util = require("CraftingGuide/Util")
 
+require("constants")
 require("strings")
 
-local ITEMS_IN_ROW = 2
-local BUTTON_WIDTH = 45
-local BUTTON_HEIGHT = 45
-local BUTTON_SPACING = 2
+local BUTTON_SETTINGS = {
+    {
+        width = 75,
+        spacing = 4,
+        imageShift = -6,
+        threshold = 5,
+    },
+    {
+        width = 45,
+        spacing = 2,
+        imageShift = -4,
+        threshold = 18,
+    },
+    {
+        width = 30,
+        spacing = 1,
+        imageShift = -2,
+        threshold = 1e5,
+    },
+}
 
 --- Tabs
 -- @param options.owner             {Player}                      player instance
@@ -25,9 +41,22 @@ local Tabs = Class(Widget, function (self, options)
     self.selectedTabIndex = options.selectedTabIndex
     self.switchTab = options.switchTab
 
-    self.root = self:AddChild(Widget("root"))
-    self.tabsWidget = self.root:AddChild(Widget("tabs"))
+    self.itemsInRow = Util:FindIndex(BUTTON_SETTINGS, function (settings)
+        return #self.tabs <= settings.threshold
+    end)
 
+    local buttonSettings = BUTTON_SETTINGS[self.itemsInRow]
+
+    self.buttonSize = buttonSettings.width
+    self.buttonSpacing = buttonSettings.spacing
+    self.imageShift = buttonSettings.imageShift
+
+    local buttonsWidth = (self.itemsInRow * self.buttonSize + (self.itemsInRow - 1) * self.buttonSpacing)
+
+    self.root = self:AddChild(Widget("root"))
+    self.root:SetPosition(-buttonsWidth / 2, 0)
+
+    self.tabsWidget = self.root:AddChild(Widget("tabs"))
     self.tabsWidget.tabs = {}
 
     self:AddTabs()
@@ -41,19 +70,19 @@ function Tabs:AddTabs(tabs)
         table.insert(self.tabsWidget.tabs, button)
 
         button:SetPosition(
-            (j % ITEMS_IN_ROW) * (BUTTON_WIDTH + BUTTON_SPACING),
-            -math.floor(j / ITEMS_IN_ROW) * (BUTTON_HEIGHT + BUTTON_SPACING)
+            (j % self.itemsInRow) * (self.buttonSize + self.buttonSpacing) + self.buttonSize / 2,
+            -math.floor(j / self.itemsInRow) * (self.buttonSize + self.buttonSpacing) - self.buttonSize / 2
         )
 
         button.defaultBg = button:AddChild(Image("images/hud.xml", "craft_slot.tex"))
-        button.defaultBg:SetSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+        button.defaultBg:SetSize(self.buttonSize, self.buttonSize)
 
         button.selectedBg = button:AddChild(Image("images/hud.xml", "craft_slot_place.tex"))
-        button.selectedBg:SetSize(BUTTON_WIDTH, BUTTON_HEIGHT)
+        button.selectedBg:SetSize(self.buttonSize, self.buttonSize)
 
         button.image = button:AddChild(Image(tab.icon_atlas or "images/hud.xml", tab.icon))
-        button.image:SetScale(0.3)
-        button.image:SetPosition(-4, 0)
+        button.image:SetScale(self.buttonSize / 150)
+        button.image:SetPosition(self.imageShift, 0)
 
         button:SetHoverText(STRINGS.TABS[tab.str])
 
