@@ -4,6 +4,7 @@ local Text = require("widgets/text")
 local ImageButton = require("widgets/imagebutton")
 
 local Recipe = require("CraftingGuide/widgets/Recipe")
+local Settings = require("CraftingGuide/widgets/Settings")
 local Tabs = require("CraftingGuide/widgets/Tabs")
 
 local Constants = require("CraftingGuide/Constants")
@@ -32,11 +33,15 @@ local RecipesTab = Class(Widget, function (self, options)
     self.chooseItem = options.chooseItem
     self.closePopup = options.closePopup
     self.needToUpdateRecipes = false
-    self.root = self:AddChild(Widget("root"))
+    self.settingsOpened = false
 
-    self.settingsButton = self.root:AddChild(ImageButton())
+    self.root = self:AddChild(Widget("root"))
+    self.tabContent = self.root:AddChild(Widget("tabContent"))
+    self.settingsContent = self.root:AddChild(Settings("settingsContent"))
+
+    self.settingsButton = self.tabContent:AddChild(ImageButton())
     self.settingsButton:SetText(STRINGS.CRAFTING_GUIDE.SETTINGS)
-    self.settingsButton:SetOnClick(function () self:OpenSettings() end)
+    self.settingsButton:SetOnClick(function () self:ShowSettingsContent() end)
     self.settingsButton:SetScale(0.6)
     self.settingsButton:SetPosition(-400, -220)
 
@@ -83,6 +88,8 @@ local RecipesTab = Class(Widget, function (self, options)
     for _, event in ipairs(IMPORTANT_EVENTS) do
         self.inst:ListenForEvent(event, function () self.needToUpdateRecipes = true end, owner)
     end
+
+    self:ShowTabContent()
 end)
 
 function RecipesTab:CreateTabs()
@@ -96,7 +103,7 @@ function RecipesTab:CreateTabs()
         table.insert(tabs, group.tab)
     end
 
-    self.tabs = self.root:AddChild(Tabs({
+    self.tabs = self.tabContent:AddChild(Tabs({
         owner = self.owner,
         tabs = tabs,
         selectedTabIndex = self.selectedTabIndex,
@@ -109,7 +116,7 @@ end
 function RecipesTab:CreateGrid()
     local recipes = self.allRecipes[self.selectedTabIndex].recipes
 
-    self.grid = self.root:AddChild(Templates.ScrollingGrid(recipes, {
+    self.grid = self.tabContent:AddChild(Templates.ScrollingGrid(recipes, {
         widget_width = Constants.RECIPE_WIDTH + Constants.RECIPE_SPACING,
         widget_height = Constants.RECIPE_HEIGHT + Constants.RECIPE_SPACING,
         num_visible_rows = #recipes > 3
@@ -146,7 +153,7 @@ function RecipesTab:ShowRecipes()
     end
 
     if #self.allRecipes == 0 then
-        self.noRecipes = self.root:AddChild(Text(NEWFONT, 60, STRINGS.CRAFTING_GUIDE.NO_RECIPES))
+        self.noRecipes = self.tabContent:AddChild(Text(NEWFONT, 60, STRINGS.CRAFTING_GUIDE.NO_RECIPES))
     else
         self:CreateGrid()
     end
@@ -178,8 +185,28 @@ function RecipesTab:SetPrefab(prefab, scrollY, selectedTabIndex)
     end
 end
 
-function RecipesTab:OpenSettings()
+function RecipesTab:ShowSettingsContent()
+    self.settingsOpened = true
 
+    self.settingsContent:Show()
+    self.tabContent:Hide()
+end
+
+function RecipesTab:ShowTabContent()
+    self.settingsOpened = false
+
+    self.tabContent:Show()
+    self.settingsContent:Hide()
+end
+
+function RecipesTab:NavigateBack()
+    if not self.settingsOpened then
+        return false
+    end
+
+    self:ShowTabContent()
+
+    return true
 end
 
 function RecipesTab:OnUpdate()

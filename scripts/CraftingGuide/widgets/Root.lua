@@ -25,10 +25,11 @@ local Root = Class(Screen, function (self, owner, prefab)
     Screen._ctor(self, "Root")
 
     self.root = self:AddChild(Widget("root"))
-    self.overlay = self.root:AddChild(ImageButton("images/global.xml", "square.tex"))
-    self.dialog = self.root:AddChild(Templates.RectangleWindow(Constants.ITEM_POPUP_WIDTH, Constants.ITEM_POPUP_HEIGHT))
-    self.root:AddChild(Templates.BackButton(function () self:NavigateBack() end))
+    self.root:SetScaleMode(SCALEMODE_PROPORTIONAL)
+    self.root:SetHAnchor(ANCHOR_MIDDLE)
+    self.root:SetVAnchor(ANCHOR_MIDDLE)
 
+    self.overlay = self.root:AddChild(ImageButton("images/global.xml", "square.tex"))
     self.overlay.image:SetVRegPoint(ANCHOR_MIDDLE)
     self.overlay.image:SetHRegPoint(ANCHOR_MIDDLE)
     self.overlay.image:SetVAnchor(ANCHOR_MIDDLE)
@@ -38,13 +39,13 @@ local Root = Class(Screen, function (self, owner, prefab)
     self.overlay:SetOnClick(function () self:Close() end)
     self.overlay:SetHelpTextMessage("")
 
+    self.dialog = self.root:AddChild(Templates.RectangleWindow(Constants.ITEM_POPUP_WIDTH, Constants.ITEM_POPUP_HEIGHT))
     -- self.dialog.top:Hide()
 
-    self.root:SetScaleMode(SCALEMODE_PROPORTIONAL)
-    self.root:SetHAnchor(ANCHOR_MIDDLE)
-    self.root:SetVAnchor(ANCHOR_MIDDLE)
+    self.root:AddChild(Templates.BackButton(function () self:NavigateBack() end))
 
     self.prefabQueue = {}
+    self.settingsOpened = false
 
     self.generalInfoTab = self.dialog:AddChild(GeneralInfoTab())
     self.recipesTab = self.dialog:AddChild(RecipesTab({
@@ -112,6 +113,10 @@ function Root:ChooseUpperQueueItem()
 end
 
 function Root:NavigateBack()
+    if self:TryRecipesBack() then
+        return
+    end
+
     table.remove(self.prefabQueue)
 
     if #self.prefabQueue > 0 then
@@ -121,24 +126,30 @@ function Root:NavigateBack()
     end
 end
 
+function Root:TryRecipesBack()
+    local queueItem = self.prefabQueue[#self.prefabQueue]
+
+    return queueItem.activeTab == Constants.TabKey.RECIPES and self.recipesTab:NavigateBack()
+end
+
 function Root:OnControl(control, down)
     if Root._base.OnControl(self, control, down) then
         return true
     end
 
-    if not down and (control == CONTROL_MAP or control == CONTROL_CANCEL) then
-        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-
-        if control == CONTROL_MAP then
-            Util:GetPlayer().HUD.controls:ToggleMap()
-        else
-            self:Close()
-        end
-
-        return true
+    if down or (control ~= CONTROL_MAP and control ~= CONTROL_CANCEL) then
+        return false
     end
 
-    return false
+    TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+
+    if control == CONTROL_MAP then
+        Util:GetPlayer().HUD.controls:ToggleMap()
+    elseif not self:TryRecipesBack() then
+        self:Close()
+    end
+
+    return true
 end
 
 function Root:OnUpdate(...)

@@ -9,7 +9,7 @@ require("strings")
 
 local BUTTON_SETTINGS = {
     {
-        width = 75,
+        width = 60,
         spacing = 4,
         imageShift = -6,
         threshold = 5,

@@ -54,7 +54,7 @@ return {
             if recipe.tab then
                 local matches = false
 
-                for _, ingredient in ipairs(ingredients) do
+                for _, ingredient in ipairs(recipe.ingredients) do
                     if ingredient.type == prefab then
                         matches = true
 
