@@ -19,8 +19,8 @@ local INITIAL_TAB_INDEX = 1
 local DEFAULT_TAB = Constants.TabKey.RECIPES
 
 --- Root
--- @param owner  {Player}  player instance
--- @param prefab {Prefab}  opened item prefab
+--- @param owner  {Player}  player instance
+--- @param prefab {Prefab}  opened item prefab
 local Root = Class(Screen, function (self, owner, prefab)
     Screen._ctor(self, "Root")
 
@@ -44,7 +44,7 @@ local Root = Class(Screen, function (self, owner, prefab)
 
     self.root:AddChild(Templates.BackButton(function () self:NavigateBack() end))
 
-    self.prefabQueue = {}
+    self.prefabHistory = {}
     self.settingsOpened = false
 
     self.generalInfoTab = self.dialog:AddChild(GeneralInfoTab())
@@ -53,6 +53,7 @@ local Root = Class(Screen, function (self, owner, prefab)
         prefab = prefab,
         closePopup = function () self:Close() end,
         chooseItem = function (...) self:ChooseItem(...) end,
+        resetValuesInHistory = function () self:ResetValuesInHistory() end,
     }))
 
     self.subscreener = Subscreener(self, self.BuildTabButtons, {
@@ -60,11 +61,11 @@ local Root = Class(Screen, function (self, owner, prefab)
         [Constants.TabKey.RECIPES] = self.recipesTab,
     })
 
-    self:AddQueueItem(prefab)
+    self:AddHistoryItem(prefab)
 end)
 
-function Root:AddQueueItem(prefab)
-    table.insert(self.prefabQueue, {
+function Root:AddHistoryItem(prefab)
+    table.insert(self.prefabHistory, {
         prefab = prefab,
         activeTab = DEFAULT_TAB,
         scrollY = INITIAL_SCROLL,
@@ -89,15 +90,16 @@ function Root:BuildTabButtons(subscreener)
 end
 
 function Root:Close()
+    Util:SaveSettings()
     TheFrontEnd:PopScreen()
 end
 
 function Root:ChooseItem(prefab, scrollYToSave, selectedTabIndex)
-    self.prefabQueue[#self.prefabQueue].scrollY = scrollYToSave
-    self.prefabQueue[#self.prefabQueue].selectedTabIndex = selectedTabIndex
-    self.prefabQueue[#self.prefabQueue].activeTab = self.subscreener.active_key
+    self.prefabHistory[#self.prefabHistory].scrollY = scrollYToSave
+    self.prefabHistory[#self.prefabHistory].selectedTabIndex = selectedTabIndex
+    self.prefabHistory[#self.prefabHistory].activeTab = self.subscreener.active_key
 
-    self:AddQueueItem(prefab)
+    self:AddHistoryItem(prefab)
 end
 
 function Root:ChooseTab(tabKey)
@@ -105,11 +107,11 @@ function Root:ChooseTab(tabKey)
 end
 
 function Root:ChooseUpperQueueItem()
-    local queueItem = self.prefabQueue[#self.prefabQueue]
+    local historyItem = self.prefabHistory[#self.prefabHistory]
 
-    self:ChooseTab(queueItem.activeTab)
-    self.generalInfoTab:SetPrefab(queueItem.prefab)
-    self.recipesTab:SetPrefab(queueItem.prefab, queueItem.scrollY, queueItem.selectedTabIndex)
+    self:ChooseTab(historyItem.activeTab)
+    self.generalInfoTab:SetPrefab(historyItem.prefab)
+    self.recipesTab:SetPrefab(historyItem.prefab, historyItem.scrollY, historyItem.selectedTabIndex)
 end
 
 function Root:NavigateBack()
@@ -117,9 +119,9 @@ function Root:NavigateBack()
         return
     end
 
-    table.remove(self.prefabQueue)
+    table.remove(self.prefabHistory)
 
-    if #self.prefabQueue > 0 then
+    if #self.prefabHistory > 0 then
         self:ChooseUpperQueueItem()
     else
         self:Close()
@@ -127,9 +129,18 @@ function Root:NavigateBack()
 end
 
 function Root:TryRecipesBack()
-    local queueItem = self.prefabQueue[#self.prefabQueue]
+    local historyItem = self.prefabHistory[#self.prefabHistory]
 
-    return queueItem.activeTab == Constants.TabKey.RECIPES and self.recipesTab:NavigateBack()
+    return historyItem.activeTab == Constants.TabKey.RECIPES and self.recipesTab:NavigateBack()
+end
+
+function Root:ResetValuesInHistory()
+    for _, historyItem in ipairs(self.prefabHistory) do
+        historyItem.scrollY = INITIAL_SCROLL
+        historyItem.selectedTabIndex = INITIAL_TAB_INDEX
+    end
+
+    self:ChooseUpperQueueItem()
 end
 
 function Root:OnControl(control, down)

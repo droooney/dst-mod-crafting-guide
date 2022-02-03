@@ -20,10 +20,10 @@ local REQUIREMENT_SIZE = 20
 local REQUIREMENT_SPACING = 2
 
 --- Recipe
--- @param options.owner      {Player}                    player instance
--- @param options.pagePrefab {Prefab}                    page prefab
--- @param options.closePopup {() => void}                close item popup
--- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
+--- @param options.owner      {Player}                    player instance
+--- @param options.pagePrefab {Prefab}                    page prefab
+--- @param options.closePopup {() => void}                close item popup
+--- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
 local Recipe = Class(Widget, function (self, options)
     Widget._ctor(self, "Recipe")
 
@@ -165,7 +165,11 @@ function Recipe:SetRecipeData(recipe)
 
     table.insert(self.requirements.items, tabIcon)
 
-    if recipe.builder_tag and Constants.BUILDER_TAG_MAP[recipe.builder_tag] ~= nil then
+    if
+        recipe.builder_tag
+        and Constants.BUILDER_TAG_MAP[recipe.builder_tag] ~= nil
+        and Util:GetSetting(Constants.MOD_OPTIONS.CHAR_SPECIFIC) == Constants.CHAR_SPECIFIC_OPTIONS.SHOW_ALL
+    then
         local charName = Constants.BUILDER_TAG_MAP[recipe.builder_tag]
         local avatarIcon = Image("images/avatars.xml", "avatar_" .. charName .. ".tex")
 
@@ -179,11 +183,12 @@ function Recipe:SetRecipeData(recipe)
     end
 
     if not knows and Util:IsLostRecipe(recipe) then
+        local blueprintOrSketchText = recipe.tab == RECIPETABS.SCULPTING
+            and "sketch.tex"
+            or "blueprint_rare.tex"
         local blueprintOrSketchIcon = Image(
-            "images/inventoryimages.xml",
-            recipe.tab == RECIPETABS.SCULPTING
-                and "sketch.tex"
-                or "blueprint_rare.tex"
+            Util:GetInventoryItemAtlas(blueprintOrSketchText),
+            blueprintOrSketchText
         )
 
         blueprintOrSketchIcon:SetHoverText(
@@ -218,7 +223,7 @@ function Recipe:SetRecipeData(recipe)
         if techPrefab then
             local techIcon
 
-            if Constants.CUSTOM_PREFAB_ICONS[techPrefab] then
+            if Util:Includes(Constants.CUSTOM_PREFAB_ICONS, techPrefab) then
                 techIcon = Image(Constants.CUSTOM_ICONS_ATLAS, techPrefab .. ".tex")
             else
                 local imgTex = techPrefab .. ".tex"

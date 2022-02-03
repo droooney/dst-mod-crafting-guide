@@ -19,11 +19,12 @@ local IMPORTANT_EVENTS = {
 }
 
 --- RecipesTab
--- ChooseItem {(prefab: Prefab, scrollY: number, selectedTabIndex: number) => void}
--- @param options.owner      {Player}      player instance
--- @param options.prefab     {Prefab}      opened item prefab
--- @param options.chooseItem {ChooseItem}  choose item callback
--- @param options.closePopup {() => void}  close item popup
+--- ChooseItem {(prefab: Prefab, scrollY: number, selectedTabIndex: number) => void}
+--- @param options.owner                {Player}      player instance
+--- @param options.prefab               {Prefab}      opened item prefab
+--- @param options.chooseItem           {ChooseItem}  choose item callback
+--- @param options.closePopup           {() => void}  close item popup
+--- @param options.resetValuesInHistory {() => void}  reset scroll/tab values in history
 local RecipesTab = Class(Widget, function (self, options)
     Widget._ctor(self, "RecipesTab")
 
@@ -32,8 +33,10 @@ local RecipesTab = Class(Widget, function (self, options)
     self.owner = options.owner
     self.chooseItem = options.chooseItem
     self.closePopup = options.closePopup
+    self.resetValuesInHistory = options.resetValuesInHistory
     self.needToUpdateRecipes = false
     self.settingsOpened = false
+    self.settings = Util:GetSettings()
 
     self.root = self:AddChild(Widget("root"))
     self.tabContent = self.root:AddChild(Widget("tabContent"))
@@ -97,15 +100,13 @@ function RecipesTab:CreateTabs()
         self.tabs:Kill()
     end
 
-    local tabs = {}
-
-    for _, group in ipairs(self.allRecipes) do
-        table.insert(tabs, group.tab)
+    if Util:GetSetting(Constants.MOD_OPTIONS.GROUP_BY) == Constants.GROUP_BY_OPTIONS.NONE then
+        return
     end
 
     self.tabs = self.tabContent:AddChild(Tabs({
         owner = self.owner,
-        tabs = tabs,
+        groups = self.allRecipes,
         selectedTabIndex = self.selectedTabIndex,
         switchTab = function (...) self:SwitchTab(...) end,
     }))
@@ -131,7 +132,7 @@ function RecipesTab:CreateGrid()
                 chooseItem = function (...) self:ChooseItem(...) end,
             })
         end,
-        apply_fn = function (context, recipeWidget, recipe)
+        apply_fn = function (_, recipeWidget, recipe)
             recipeWidget:SetRecipeData(recipe)
         end,
         scrollbar_offset = 70,
@@ -172,7 +173,7 @@ end
 function RecipesTab:SetPrefab(prefab, scrollY, selectedTabIndex)
     self.prefab = prefab
     self.selectedTabIndex = selectedTabIndex
-    self.allRecipes = Util:GetAllRecipesGrouped(prefab, Constants.ItemsGroupingType.TAB)
+    self.allRecipes = Util:GetAllRecipesGrouped(prefab)
 
     self:CreateTabs()
     self:ShowRecipes()
@@ -205,6 +206,12 @@ function RecipesTab:NavigateBack()
     end
 
     self:ShowTabContent()
+
+    if Util:HaveSettingsChanged(self.settings) then
+        self.resetValuesInHistory()
+    end
+
+    self.settings = Util:GetSettings()
 
     return true
 end

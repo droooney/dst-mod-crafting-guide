@@ -5,12 +5,12 @@ local IngredientUI = require("widgets/ingredientui")
 local Util = require("CraftingGuide/Util")
 
 --- Ingredient
--- @param options.ingredient {Ingredient}                ingredient instance
--- @param options.needed     {number | nil}              needed amount
--- @param options.onHand     {number | nil}              amount on hand
--- @param options.has        {boolean}                   if amount is enough
--- @param options.disabled   {boolean}                   is button disabled
--- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
+--- @param options.ingredient {Ingredient}                ingredient instance
+--- @param options.needed     {number | nil}              needed amount
+--- @param options.onHand     {number | nil}              amount on hand
+--- @param options.has        {boolean}                   if amount is enough
+--- @param options.disabled   {boolean}                   is button disabled
+--- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
 local Ingredient = Class(Widget, function (self, options)
     Widget._ctor(self, "Ingredient")
 

@@ -10,3 +10,7 @@ STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_PROTOTYPE = "Над�
 
 STRINGS.CRAFTING_GUIDE.TABS.INFO = "Информация"
 STRINGS.CRAFTING_GUIDE.TABS.RECIPES = "Рецепты"
+
+STRINGS.CRAFTING_GUIDE.SETTINGS_CONTENT.GROUP_BY_KNOWLEDGE.KNOWN_RECIPE = "Рецепт известен"
+STRINGS.CRAFTING_GUIDE.SETTINGS_CONTENT.GROUP_BY_KNOWLEDGE.UNKNOWN_RECIPE = "Рецепт неизвестен, нужен прототип"
+STRINGS.CRAFTING_GUIDE.SETTINGS_CONTENT.GROUP_BY_KNOWLEDGE.NO_BLUEPRINT = "Чертежа не существует, для крафта требуется станция"

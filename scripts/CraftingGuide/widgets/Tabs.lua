@@ -2,6 +2,7 @@ local Widget = require("widgets/widget")
 local Image = require("widgets/image")
 local Button = require("widgets/button")
 
+local Constants = require("CraftingGuide/Constants")
 local Util = require("CraftingGuide/Util")
 
 require("constants")
@@ -11,7 +12,7 @@ local BUTTON_SETTINGS = {
     {
         width = 60,
         spacing = 4,
-        imageShift = -6,
+        imageShift = -4,
         threshold = 5,
     },
     {
@@ -29,20 +30,20 @@ local BUTTON_SETTINGS = {
 }
 
 --- Tabs
--- @param options.owner            {Player}                      player instance
--- @param options.tabs             {RecipeTab[]}                 tabs array
--- @param options.selectedTabIndex {number}                      selected tab index
--- @param options.switchTab        {(tabIndex: number) => void}  switch tab callbackd
+--- @param options.owner            {Player}                      player instance
+--- @param options.groups           {RecipeGroup[]}               recipe groups
+--- @param options.selectedTabIndex {number}                      selected tab index
+--- @param options.switchTab        {(tabIndex: number) => void}  switch tab callbackd
 local Tabs = Class(Widget, function (self, options)
     Widget._ctor(self, "Tabs")
 
     self.owner = options.owner
-    self.tabs = options.tabs
+    self.groups = options.groups
     self.selectedTabIndex = options.selectedTabIndex
     self.switchTab = options.switchTab
 
     self.itemsInRow = Util:FindIndex(BUTTON_SETTINGS, function (settings)
-        return #self.tabs <= settings.threshold
+        return #self.groups <= settings.threshold
     end)
 
     local buttonSettings = BUTTON_SETTINGS[self.itemsInRow]
@@ -63,7 +64,9 @@ local Tabs = Class(Widget, function (self, options)
 end)
 
 function Tabs:AddTabs()
-    for i, tab in ipairs(self.tabs) do
+    local groupBy = Util:GetSetting(Constants.MOD_OPTIONS.GROUP_BY)
+
+    for i, group in ipairs(self.groups) do
         local j = i - 1
         local button = self.tabsWidget:AddChild(Button())
 
@@ -80,11 +83,31 @@ function Tabs:AddTabs()
         button.selectedBg = button:AddChild(Image("images/hud.xml", "craft_slot_place.tex"))
         button.selectedBg:SetSize(self.buttonSize, self.buttonSize)
 
-        button.image = button:AddChild(Image(tab.icon_atlas or "images/hud.xml", tab.icon))
-        button.image:SetScale(self.buttonSize / 150)
-        button.image:SetPosition(self.imageShift, 0)
+        if groupBy == Constants.GROUP_BY_OPTIONS.CRAFTING_TAB then
+            local tab = group.tab
 
-        button:SetHoverText(STRINGS.TABS[tab.str])
+            button.image = button:AddChild(Image(tab.icon_atlas or "images/hud.xml", tab.icon))
+            button.image:SetScale(self.buttonSize / 150)
+            button.image:SetPosition(self.imageShift, 0)
+
+            button:SetHoverText(STRINGS.TABS[tab.str])
+        elseif groupBy == Constants.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE then
+            local blueprintTex = "blueprint.tex"
+
+            button.image = button:AddChild(Image(Util:GetInventoryItemAtlas(blueprintTex), blueprintTex))
+            button.image:SetScale(self.buttonSize / 90)
+
+            local iconTex = group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.KNOWN_RECIPE
+                and "checkmark.tex"
+                or group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.UNKNOWN_RECIPE
+                    and "question.tex"
+                    or "cross.tex"
+
+            button.iconImage = button:AddChild(Image(Constants.CUSTOM_ICONS_ATLAS, iconTex))
+            button.iconImage:SetScale(self.buttonSize / 150)
+
+            button:SetHoverText(STRINGS.CRAFTING_GUIDE.SETTINGS_CONTENT.GROUP_BY_KNOWLEDGE[group.key])
+        end
 
         button:SetOnClick(function ()
             self:SelectTab(i)

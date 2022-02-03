@@ -1,3 +1,26 @@
+local MOD_OPTIONS = {
+    GROUP_BY = "GROUP_BY",
+    CHAR_SPECIFIC = "CHAR_SPECIFIC",
+}
+
+local GROUP_BY_OPTIONS = {
+    CRAFTING_TAB = "CRAFTING_TAB",
+    RECIPE_KNOWLEDGE = "RECIPE_KNOWLEDGE",
+    NONE = "NONE",
+}
+
+local GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS = {
+    KNOWN_RECIPE = "KNOWN_RECIPE",
+    UNKNOWN_RECIPE = "UNKNOWN_RECIPE",
+    NO_BLUEPRINT = "NO_BLUEPRINT",
+}
+
+local CHAR_SPECIFIC_OPTIONS = {
+    SHOW_ALL = "SHOW_ALL",
+    SHOW_MINE = "SHOW_MINE",
+    HIDE = "HIDE",
+}
+
 local BUILDER_TAG_MAP = {
     pyromaniac = "willow",
     spiderwhisperer = "webber",
@@ -15,6 +38,8 @@ local BUILDER_TAG_MAP = {
     battlesinger = "wathgrithr",
     professionalchef = "warly",
     plantkin = "wormwood",
+    clockmaker = "wanda",
+    strongman = "wolfgang",
 }
 
 local REQUIRED_TECH = {
@@ -63,15 +88,11 @@ local REQUIRED_TECH = {
 local CUSTOM_ICONS_ATLAS = resolvefilepath("images/CraftingGuide/icons.xml")
 
 local CUSTOM_PREFAB_ICONS = {
-    hermitcrab = true,
-    critterlab = true,
-    moon_altar = true,
-    ancient_altar_broken = true,
-    ancient_altar = true,
-}
-
-local ItemsGroupingType = {
-    TAB = "TAB",
+    "hermitcrab",
+    "critterlab",
+    "moon_altar",
+    "ancient_altar_broken",
+    "ancient_altar",
 }
 
 local TabKey = {
@@ -92,6 +113,11 @@ local VISIBLE_RECIPES_ONE_ROW = 1.9
 local VISIBLE_RECIPES_MORE_ROWS = 1.65
 
 return {
+    MOD_OPTIONS = MOD_OPTIONS,
+    GROUP_BY_OPTIONS = GROUP_BY_OPTIONS,
+    GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS = GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS,
+    CHAR_SPECIFIC_OPTIONS = CHAR_SPECIFIC_OPTIONS,
+
     BUILDER_TAG_MAP = BUILDER_TAG_MAP,
     REQUIRED_TECH = REQUIRED_TECH,
     CUSTOM_ICONS_ATLAS = CUSTOM_ICONS_ATLAS,
@@ -105,6 +131,5 @@ return {
     VISIBLE_RECIPES_ONE_ROW = VISIBLE_RECIPES_ONE_ROW,
     VISIBLE_RECIPES_MORE_ROWS = VISIBLE_RECIPES_MORE_ROWS,
 
-    ItemsGroupingType = ItemsGroupingType,
     TabKey = TabKey,
 }
