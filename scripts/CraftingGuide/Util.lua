@@ -229,21 +229,33 @@ return {
     end,
 
     GetRecipeOwnedSkins = function (self, recipe)
-        local list = {recipe.product}
+        local list = {
+            {
+                skin = recipe.product,
+                atlas = recipe:GetAtlas(),
+                tex = recipe.image,
+            }
+        }
         local skins = PREFAB_SKINS[recipe.product]
 
         if skins then
             for _, skin in ipairs(PREFAB_SKINS[recipe.product]) do
                 if TheInventory:CheckOwnershipGetLatest(skin) then
-                    table.insert(list, skin)
+                    local tex = skin .. ".tex"
+
+                    table.insert(list, {
+                        skin = skin,
+                        atlas = self:GetInventoryItemAtlas(tex),
+                        tex = tex,
+                    })
                 end
             end
         end
 
-        return self:Map(list, function (prefab)
+        return self:Map(list, function (item)
             return {
-                data = prefab,
-                image = {GetInventoryItemAtlas(prefab .. ".tex"), prefab .. ".tex", "default.tex"},
+                data = item.skin,
+                image = {item.atlas, item.tex, "default.tex"},
             }
         end)
     end,
