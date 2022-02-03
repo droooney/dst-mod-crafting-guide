@@ -40,6 +40,7 @@ local BUILDER_TAG_MAP = {
     plantkin = "wormwood",
     clockmaker = "wanda",
     strongman = "wolfgang",
+    balloonomancer = "wes",
 }
 
 local REQUIRED_TECH = {

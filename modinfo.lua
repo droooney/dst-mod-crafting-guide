@@ -1,13 +1,13 @@
 name = "Crafting Guide"
-description = "Cool mod by droooney"
-author = "droooney"
+description = "This mod helps to find out what you can craft from an item in your inventory or any container"
+author = "jimmybaxter"
 version = "0.1"
 api_version = 10
 dst_compatible = true
 all_clients_require_mod = false
 client_only_mod = true
---icon_atlas = "modicon.xml"
---icon = "modicon.tex"
+icon_atlas = "modicon.xml"
+icon = "modicon.tex"
 server_filter_tags = {}
 forumthread = ""
 
@@ -21,7 +21,7 @@ translations.GROUP_BY = "Group By"
 translations.GROUP_BY_DESCRIPTION = "Sets what recipes grouping should be based on"
 
 translations.GROUP_BY_OPTIONS.CRAFTING_TAB = "Crafting Tab"
-translations.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE = "Blueprint Knowledge"
+translations.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE = "Recipe Knowledge"
 translations.GROUP_BY_OPTIONS.NONE = "None"
 
 translations.CHAR_SPECIFIC = "Character-Specific Recipes"
@@ -37,7 +37,7 @@ if language == "ru" or locale == "ru" then
     translations.GROUP_BY_DESCRIPTION = "По какому признаку группировать рецепты"
 
     translations.GROUP_BY_OPTIONS.CRAFTING_TAB = "Вкладке крафта"
-    translations.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE = "Знанию чертежа"
+    translations.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE = "Знанию рецепта"
     translations.GROUP_BY_OPTIONS.NONE = "Без группировки"
 
     translations.CHAR_SPECIFIC = "Особые рецепты персонажей"
