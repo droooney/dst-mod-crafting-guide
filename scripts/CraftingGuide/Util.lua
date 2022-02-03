@@ -228,6 +228,26 @@ return {
         return groups
     end,
 
+    GetRecipeOwnedSkins = function (self, recipe)
+        local list = {recipe.product}
+        local skins = PREFAB_SKINS[recipe.product]
+
+        if skins then
+            for _, skin in ipairs(PREFAB_SKINS[recipe.product]) do
+                if TheInventory:CheckOwnershipGetLatest(skin) then
+                    table.insert(list, skin)
+                end
+            end
+        end
+
+        return self:Map(list, function (prefab)
+            return {
+                data = prefab,
+                image = {GetInventoryItemAtlas(prefab .. ".tex"), prefab .. ".tex", "default.tex"},
+            }
+        end)
+    end,
+
     IsLostRecipe = function (self, recipe)
         return recipe.level.MAGIC >= 10 and recipe.level.SCIENCE >= 10 and recipe.level.ANCIENT >= 10
     end,

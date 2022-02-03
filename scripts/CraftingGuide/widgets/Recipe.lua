@@ -2,6 +2,7 @@ local Widget = require("widgets/widget")
 local Image = require("widgets/image")
 local ImageButton = require("widgets/imagebutton")
 local Text = require("widgets/text")
+local Spinner = require("widgets/spinner")
 
 local Ingredient = require("CraftingGuide/widgets/Ingredient")
 
@@ -31,30 +32,52 @@ local Recipe = Class(Widget, function (self, options)
     self.pagePrefab = options.pagePrefab
     self.closePopup = options.closePopup
     self.chooseItem = options.chooseItem
+
     self.root = self:AddChild(Widget("root"))
+
     self.rootButton = self.root:AddChild(ImageButton("images/plantregistry.xml", "plant_entry.tex", "plant_entry_focus.tex"))
+
     self.recipeItemBg = self.rootButton:AddChild(Image("images/plantregistry.xml", "plant_entry_active.tex"))
+
     self.name = self.rootButton:AddChild(Text(UIFONT, 22))
-    self.recipeImage = self.rootButton:AddChild(Image())
-    self.craftedCount = self.rootButton:AddChild(Text(UIFONT, 28))
-    self.ingredients = self.rootButton:AddChild(Widget("ingredients"))
-    self.requirements = self.rootButton:AddChild(Widget("requirements"))
-    self.craftButton = self.rootButton:AddChild(ImageButton())
-
-    self.ingredients.items = {}
-    self.requirements.items = {}
-
-    self.name:SetPosition(0, 85, 0)
+    self.name:SetPosition(0, 85)
     self.name:SetHAlign(ANCHOR_MIDDLE)
 
-    self.recipeImage:SetScale(0.8)
-    self.recipeImage:SetPosition(0, 40, 0)
-    self.craftedCount:SetPosition(30, 20, 0)
-    self.ingredients:SetPosition(0, -20, 0)
-    self.requirements:SetPosition(0, -60, 0)
+    self.recipeSkins = self.rootButton:AddChild(
+        Spinner({}, Constants.RECIPE_WIDTH, nil, nil, nil, nil, {
+            arrow_left_normal = "crafting_inventory_arrow_l_idle.tex",
+            arrow_left_over = "crafting_inventory_arrow_l_hl.tex",
+            arrow_left_disabled = "arrow_left_disabled.tex",
+            arrow_left_down = "crafting_inventory_arrow_l_hl.tex",
+            arrow_right_normal = "crafting_inventory_arrow_r_idle.tex",
+            arrow_right_over = "crafting_inventory_arrow_r_hl.tex",
+            arrow_right_disabled = "arrow_right_disabled.tex",
+            arrow_right_down = "crafting_inventory_arrow_r_hl.tex",
+            bg_middle = "blank.tex",
+            bg_middle_focus = "blank.tex",
+            bg_middle_changing = "blank.tex",
+            bg_end = "blank.tex",
+            bg_end_focus = "blank.tex",
+            bg_end_changing = "blank.tex",
+        }, true)
+    )
+    self.recipeSkins:SetScale(0.85)
+    self.recipeSkins:SetPosition(0, 40)
 
+    self.craftedCount = self.rootButton:AddChild(Text(UIFONT, 28))
+    self.craftedCount:SetPosition(30, 20)
+
+    self.ingredients = self.rootButton:AddChild(Widget("ingredients"))
+    self.ingredients:SetPosition(0, -20)
+    self.ingredients.items = {}
+
+    self.requirements = self.rootButton:AddChild(Widget("requirements"))
+    self.requirements:SetPosition(0, -60)
+    self.requirements.items = {}
+
+    self.craftButton = self.rootButton:AddChild(ImageButton())
     self.craftButton:SetScale(0.56)
-    self.craftButton:SetPosition(0, -90, 0)
+    self.craftButton:SetPosition(0, -90)
 
     local _OnControl = self.rootButton.OnControl
 
@@ -77,6 +100,18 @@ local Recipe = Class(Widget, function (self, options)
             end
         end
 
+        if self.recipeSkins.leftimage.enabled and self.recipeSkins.leftimage.focus then
+            self.recipeSkins.leftimage:OnControl(control, down)
+
+            return true
+        end
+
+        if self.recipeSkins.rightimage.enabled and self.recipeSkins.rightimage.focus then
+            self.recipeSkins.rightimage:OnControl(control, down)
+
+            return true
+        end
+
         return _OnControl(_, control, down)
     end
 
@@ -90,6 +125,9 @@ function Recipe:SetRecipeData(recipe)
         return
     end
 
+    local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
+    local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
+
     local builder = self.owner.replica.builder
     local inventory = self.owner.replica.inventory
     local knows = builder:KnowsRecipe(recipe.name)
@@ -102,8 +140,9 @@ function Recipe:SetRecipeData(recipe)
 
     self.root:Show()
     self.name:SetTruncatedString(Util:GetPrefabString(recipe.product), 180, nil, true)
-    self.recipeImage:SetTexture(recipe:GetAtlas(), recipe.image)
     self.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
+    self.recipeSkins:SetOptions(recipeSkins)
+    self.recipeSkins:SetSelected(lastSkin)
 
     for _, ingredient in ipairs(self.ingredients.items) do
         ingredient:Kill()
@@ -254,13 +293,13 @@ function Recipe:SetRecipeData(recipe)
 
     for i, ingredient in ipairs(self.ingredients.items) do
         self.ingredients:AddChild(ingredient)
-        ingredient:SetPosition((i - (#self.ingredients.items + 1) / 2) * INGREDIENT_SIZE, 0, 0)
+        ingredient:SetPosition((i - (#self.ingredients.items + 1) / 2) * INGREDIENT_SIZE, 0)
     end
 
     for i, requirement in ipairs(self.requirements.items) do
         self.requirements:AddChild(requirement)
         requirement:SetSize(REQUIREMENT_SIZE, REQUIREMENT_SIZE)
-        requirement:SetPosition((i - (#self.requirements.items + 1) / 2) * (REQUIREMENT_SIZE + REQUIREMENT_SPACING), 0, 0)
+        requirement:SetPosition((i - (#self.requirements.items + 1) / 2) * (REQUIREMENT_SIZE + REQUIREMENT_SPACING), 0)
     end
 
     self.craftButton:SetText(
@@ -281,12 +320,14 @@ function Recipe:SetRecipeData(recipe)
             self.closePopup()
         end
 
-        -- TODO: add support for skins
-        DoRecipeClick(self.owner, recipe, recipe.name)
+        local selectedSkin = self.recipeSkins:GetSelected().data
+
+        DoRecipeClick(self.owner, recipe, selectedSkin)
+        Profile:SetLastUsedSkinForItem(recipe.name, selectedSkin)
     end)
 
     self.rootButton:SetOnClick(function ()
-        self.chooseItem(recipe.name)
+        self.chooseItem(recipe.product)
     end)
 end
 
