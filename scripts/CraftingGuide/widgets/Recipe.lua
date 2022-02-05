@@ -125,9 +125,6 @@ function Recipe:SetRecipeData(recipe)
         return
     end
 
-    local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
-    local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
-
     local builder = self.owner.replica.builder
     local inventory = self.owner.replica.inventory
     local knows = builder:KnowsRecipe(recipe.name)
@@ -141,8 +138,14 @@ function Recipe:SetRecipeData(recipe)
     self.root:Show()
     self.name:SetTruncatedString(Util:GetPrefabString(recipe.product), 180, nil, true)
     self.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
-    self.recipeSkins:SetOptions(recipeSkins)
-    self.recipeSkins:SetSelected(lastSkin)
+
+    if not self.recipe or self.recipe.name ~= recipe.name then
+        local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
+        local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
+
+        self.recipeSkins:SetOptions(recipeSkins)
+        self.recipeSkins:SetSelected(lastSkin)
+    end
 
     for _, ingredient in ipairs(self.ingredients.items) do
         ingredient:Kill()
@@ -329,6 +332,8 @@ function Recipe:SetRecipeData(recipe)
     self.rootButton:SetOnClick(function ()
         self.chooseItem(recipe.product)
     end)
+
+    self.recipe = recipe
 end
 
 return Recipe
