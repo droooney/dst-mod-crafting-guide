@@ -12,19 +12,16 @@ local BUTTON_SETTINGS = {
     {
         width = 60,
         spacing = 4,
-        imageShift = -4,
         threshold = 5,
     },
     {
         width = 45,
         spacing = 2,
-        imageShift = -4,
         threshold = 18,
     },
     {
         width = 30,
         spacing = 1,
-        imageShift = -2,
         threshold = 1e5,
     },
 }
@@ -50,7 +47,6 @@ local Tabs = Class(Widget, function (self, options)
 
     self.buttonSize = buttonSettings.width
     self.buttonSpacing = buttonSettings.spacing
-    self.imageShift = buttonSettings.imageShift
 
     local buttonsWidth = (self.itemsInRow * self.buttonSize + (self.itemsInRow - 1) * self.buttonSpacing)
 
@@ -84,24 +80,35 @@ function Tabs:AddTabs()
         button.selectedBg:SetSize(self.buttonSize, self.buttonSize)
 
         if groupBy == Constants.GROUP_BY_OPTIONS.CRAFTING_TAB then
-            local tab = group.tab
+            local filterDef = Util:Find(CRAFTING_FILTER_DEFS, function (filter)
+                return filter.name == group.key
+            end)
 
-            button.image = button:AddChild(Image(tab.icon_atlas or "images/hud.xml", tab.icon))
-            button.image:SetScale(self.buttonSize / 150)
-            button.image:SetPosition(self.imageShift, 0)
+            if filterDef then
+                local filterAtlas = FunctionOrValue(filterDef.atlas, self.owner, filterDef)
+                local filterImage = FunctionOrValue(filterDef.image, self.owner, filterDef)
 
-            button:SetHoverText(STRINGS.TABS[tab.str])
+                button.image = button:AddChild(Image(filterAtlas, filterImage))
+                button.image:SetScale(self.buttonSize / 300)
+
+                button:SetHoverText(STRINGS.UI.CRAFTING_FILTERS[filterDef.name])
+            end
         elseif groupBy == Constants.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE then
-            local blueprintTex = "blueprint.tex"
+            local blueprintTex = (
+                group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.KNOWN_RECIPE
+                or group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.UNKNOWN_RECIPE
+            )
+                and "blueprint.tex"
+                or "blueprint_rare.tex"
 
             button.image = button:AddChild(Image(Util:GetInventoryItemAtlas(blueprintTex), blueprintTex))
             button.image:SetScale(self.buttonSize / 90)
 
             local iconTex = group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.KNOWN_RECIPE
                 and "checkmark.tex"
-                or group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.UNKNOWN_RECIPE
-                    and "question.tex"
-                    or "cross.tex"
+                or group.key == Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.NO_BLUEPRINT
+                    and "cross.tex"
+                    or "question.tex"
 
             button.iconImage = button:AddChild(Image(Constants.CUSTOM_ICONS_ATLAS, iconTex))
             button.iconImage:SetScale(self.buttonSize / 150)

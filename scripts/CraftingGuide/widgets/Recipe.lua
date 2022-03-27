@@ -21,17 +21,21 @@ local REQUIREMENT_SIZE = 20
 local REQUIREMENT_SPACING = 2
 
 --- Recipe
---- @param options.owner      {Player}                    player instance
---- @param options.pagePrefab {Prefab}                    page prefab
---- @param options.closePopup {() => void}                close item popup
---- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
+--- @param options.owner      {Player}                                    player instance
+--- @param options.skins      {Dictionary<Prefab>}                        chosen skins dictionary
+--- @param options.pagePrefab {Prefab}                                    page prefab
+--- @param options.closePopup {() => void}                                close item popup
+--- @param options.chooseItem {(prefab: Prefab) => void}                  choose item callback
+--- @param options.chooseSkin {(itemPrefab: Prefab, skinPrefab) => void}  choose skin callback
 local Recipe = Class(Widget, function (self, options)
     Widget._ctor(self, "Recipe")
 
     self.owner = options.owner
+    self.skins = options.skins
     self.pagePrefab = options.pagePrefab
     self.closePopup = options.closePopup
     self.chooseItem = options.chooseItem
+    self.chooseSkin = options.chooseSkin
 
     self.root = self:AddChild(Widget("root"))
 
@@ -63,6 +67,15 @@ local Recipe = Class(Widget, function (self, options)
     )
     self.recipeSkins:SetScale(0.85)
     self.recipeSkins:SetPosition(0, 40)
+    self.recipeSkins:SetOnChangedFn(function ()
+        if not self.recipe then
+            return
+        end
+
+        local selectedSkin = self.recipeSkins:GetSelected().data
+
+        self.chooseSkin(self.recipe.name, selectedSkin)
+    end)
 
     self.craftedCount = self.rootButton:AddChild(Text(UIFONT, 28))
     self.craftedCount:SetPosition(30, 20)
@@ -100,13 +113,15 @@ local Recipe = Class(Widget, function (self, options)
             end
         end
 
-        if self.recipeSkins.leftimage.enabled and self.recipeSkins.leftimage.focus then
+        local spinnerActive = self.recipeSkins.leftimage.enabled or self.recipeSkins.rightimage.enabled
+
+        if self.recipeSkins.leftimage.focus and spinnerActive then
             self.recipeSkins.leftimage:OnControl(control, down)
 
             return true
         end
 
-        if self.recipeSkins.rightimage.enabled and self.recipeSkins.rightimage.focus then
+        if self.recipeSkins.rightimage.focus and spinnerActive then
             self.recipeSkins.rightimage:OnControl(control, down)
 
             return true
@@ -119,6 +134,8 @@ local Recipe = Class(Widget, function (self, options)
 end)
 
 function Recipe:SetRecipeData(recipe)
+    self.recipe = recipe
+
     if not recipe then
         self.root:Hide()
 
@@ -134,18 +151,17 @@ function Recipe:SetRecipeData(recipe)
     local techLevel = builder:GetTechTrees()
     local techBonuses = builder:GetTechBonuses()
     local shouldHint = not knows and not (canLearn and CanPrototypeRecipe(recipe.level, techLevel))
+    local isSculpture = Util:StartsWith(recipe.name, "chesspiece_")
 
     self.root:Show()
     self.name:SetTruncatedString(Util:GetPrefabString(recipe.product), 180, nil, true)
     self.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
 
-    if not self.recipe or self.recipe.name ~= recipe.name then
-        local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
-        local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
+    local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
+    local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
 
-        self.recipeSkins:SetOptions(recipeSkins)
-        self.recipeSkins:SetSelected(lastSkin)
-    end
+    self.recipeSkins:SetOptions(recipeSkins)
+    self.recipeSkins:SetSelected(self.skins[recipe.name] or lastSkin)
 
     for _, ingredient in ipairs(self.ingredients.items) do
         ingredient:Kill()
@@ -197,16 +213,6 @@ function Recipe:SetRecipeData(recipe)
         }))
     end
 
-    local tabIcon = Image(recipe.tab.icon_atlas or "images/hud.xml", recipe.tab.icon)
-
-    tabIcon:SetHoverText(Util:GetReplacedString(
-        STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TAB,
-        { tab = STRINGS.TABS[recipe.tab.str] }
-    ))
-    tabIcon:SetScale(1.1)
-
-    table.insert(self.requirements.items, tabIcon)
-
     if
         recipe.builder_tag
         and Constants.BUILDER_TAG_MAP[recipe.builder_tag] ~= nil
@@ -224,8 +230,15 @@ function Recipe:SetRecipeData(recipe)
         table.insert(self.requirements.items, avatarIcon)
     end
 
-    if not knows and Util:IsLostRecipe(recipe) then
-        local blueprintOrSketchText = recipe.tab == RECIPETABS.SCULPTING
+    if
+        not knows
+        and Util:IsLostRecipe(recipe)
+        and (
+            isSculpture
+            or Util:GetSetting(Constants.MOD_OPTIONS.GROUP_BY) ~= Constants.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE
+        )
+    then
+        local blueprintOrSketchText = isSculpture
             and "sketch.tex"
             or "blueprint_rare.tex"
         local blueprintOrSketchIcon = Image(
@@ -234,7 +247,7 @@ function Recipe:SetRecipeData(recipe)
         )
 
         blueprintOrSketchIcon:SetHoverText(
-            recipe.tab == RECIPETABS.SCULPTING
+            isSculpture
                 and STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_SKETCH
                 or STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_RARE_BLUEPRINT
         )
@@ -243,12 +256,12 @@ function Recipe:SetRecipeData(recipe)
     end
 
     if
-        recipe.tab == RECIPETABS.SCULPTING
+        isSculpture
         or (not knows and not CanPrototypeRecipe(recipe.level, techLevel))
     then
         local techPrefab
 
-        if recipe.tab == RECIPETABS.SCULPTING then
+        if isSculpture then
             techPrefab = Constants.REQUIRED_TECH.SCULPTING_1
         else
             for tech, value in pairs(recipe.level) do
@@ -308,8 +321,11 @@ function Recipe:SetRecipeData(recipe)
     self.craftButton:SetText(
         (not knows and not recipe.nounlock and canLearn and STRINGS.UI.CRAFTING.PROTOTYPE)
         or (buffered and STRINGS.UI.CRAFTING.PLACE)
-        or STRINGS.UI.CRAFTING.TABACTION[recipe.tab.str]
-        or STRINGS.UI.CRAFTING.BUILD
+        or (
+            recipe.actionstr ~= nil
+                and STRINGS.UI.CRAFTING.RECIPEACTION[recipe.actionstr]
+                or STRINGS.UI.CRAFTING.BUILD
+        )
     )
 
     if (buffered or canBuild) and not shouldHint then
@@ -332,8 +348,6 @@ function Recipe:SetRecipeData(recipe)
     self.rootButton:SetOnClick(function ()
         self.chooseItem(recipe.product)
     end)
-
-    self.recipe = recipe
 end
 
 return Recipe

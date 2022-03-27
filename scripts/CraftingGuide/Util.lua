@@ -6,23 +6,26 @@ require("constants")
 require("strings")
 require("stringutil")
 
-local DEBUG_MODE = true
-
--- DEBUG_MODE = false
-
 local KNOWLEDGE_SORT = {
     Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.KNOWN_RECIPE,
     Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.UNKNOWN_RECIPE,
+    Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.RARE_BLUEPRINT,
     Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.NO_BLUEPRINT,
 }
 
 return {
     isDST = TheSim:GetGameID() == "DST",
     modname = nil,
+    global = nil,
     settings = nil,
+    bindings = {},
 
     SetModName = function (self, modname)
         self.modname = modname
+    end,
+
+    SetGlobal = function (self, global)
+        self.global = global
     end,
 
     GetSettings = function (self)
@@ -48,7 +51,17 @@ return {
     end,
 
     SetSetting = function (self, name, value)
+        local oldValue = self.settings[name]
+
+        if oldValue == value then
+            return
+        end
+
         self.settings[name] = value
+
+        if name == Constants.MOD_OPTIONS.KEY_OPEN_ALL then
+            self:ChangeKeyBinding(value, name)
+        end
     end,
 
     SaveSettings = function (self)
@@ -90,9 +103,7 @@ return {
     end,
 
     Log = function (self, ...)
-        if DEBUG_MODE then
-            print("[Crafting Guide]:", ...)
-        end
+        print("[Crafting Guide]:", ...)
     end,
 
     FindIndex = function (self, array, cb)
@@ -103,6 +114,14 @@ return {
         end
 
         return 0
+    end,
+
+    Find = function (self, array, cb)
+        for i, v in ipairs(array) do
+            if cb(v, i, array) then
+                return v
+            end
+        end
     end,
 
     IndexOf = function (self, array, value)
@@ -125,6 +144,10 @@ return {
         return newArray
     end,
 
+    StartsWith = function (self, str, start)
+        return str:sub(1, #start) == start
+    end,
+
     GetInventoryItemAtlas = function (self, itemTex)
         return self.isDST
             and GetInventoryItemAtlas(itemTex)
@@ -137,15 +160,29 @@ return {
         local charSpecific = self:GetSetting(Constants.MOD_OPTIONS.CHAR_SPECIFIC)
         local recipes = {}
 
+        local recipeFilters = {}
+
+        for filterName, filter in pairs(CRAFTING_FILTERS) do
+            local filterRecipes = FunctionOrValue(filter.recipes) or {}
+
+            for _, recipeName in ipairs(filterRecipes) do
+                recipeFilters[recipeName] = recipeFilters[recipeName] or {}
+
+                table.insert(recipeFilters[recipeName], filterName)
+            end
+        end
+
         for _, recipe in pairs(AllRecipes) do
-            if recipe.tab then
-                local matches = false
+            if recipeFilters[recipe.name] then
+                local matches = prefab == nil
 
-                for _, ingredient in ipairs(recipe.ingredients) do
-                    if ingredient.type == prefab then
-                        matches = true
+                if not matches then
+                    for _, ingredient in ipairs(recipe.ingredients) do
+                        if ingredient.type == prefab then
+                            matches = true
 
-                        break
+                            break
+                        end
                     end
                 end
 
@@ -169,13 +206,13 @@ return {
             return recipe1.sortkey < recipe2.sortkey
         end)
 
-        return recipes
+        return recipes, recipeFilters
     end,
 
     GetAllRecipesGrouped = function (self, prefab)
         local player = self:GetPlayer()
         local builder = player.replica.builder
-        local recipes = self:GetAllRecipes(prefab)
+        local recipes, recipeFilters = self:GetAllRecipes(prefab)
         local groupsMap = {}
         local groups = {}
         local groupBy = self:GetSetting(Constants.MOD_OPTIONS.GROUP_BY)
@@ -183,39 +220,61 @@ return {
         local isKnowledgeGrouping = groupBy == Constants.GROUP_BY_OPTIONS.RECIPE_KNOWLEDGE
 
         for _, recipe in ipairs(recipes) do
-            local groupKey = "all"
+            local groupKeys = {"all"}
 
             if isTabGrouping then
-                groupKey = recipe.tab.str
+                groupKeys = recipeFilters[recipe.name] or {}
             elseif isKnowledgeGrouping then
                 if recipe.nounlock then
-                    groupKey = Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.NO_BLUEPRINT
+                    groupKeys = {Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.NO_BLUEPRINT}
                 else
+                    local hasTag = recipe.builder_tag == nil or builder.inst:HasTag(recipe.builder_tag)
+
+                    if not hasTag then
+                        -- temporarily add builder tag to find out if prototyping is required
+                        builder.inst:AddTag(recipe.builder_tag)
+                    end
+
                     local knows = builder:KnowsRecipe(recipe.name)
                     local canLearn = builder:CanLearn(recipe.name)
 
-                    groupKey = not knows and canLearn
-                        and Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.UNKNOWN_RECIPE
-                        or Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.KNOWN_RECIPE
+                    if not hasTag then
+                        builder.inst:RemoveTag(recipe.builder_tag)
+                    end
+
+                    groupKeys = not knows and canLearn
+                        and (
+                            self:IsLostRecipe(recipe)
+                                and {Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.RARE_BLUEPRINT}
+                                or {Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.UNKNOWN_RECIPE}
+                        )
+                        or {Constants.GROUP_BY_RECIPE_KNOWLEDGE_OPTIONS.KNOWN_RECIPE}
                 end
             end
 
-            groupsMap[groupKey] = groupsMap[groupKey] or {
-                key = groupKey,
-                recipes = {},
-                tab = recipe.tab,
-            }
+            for _, groupKey in ipairs(groupKeys) do
+                groupsMap[groupKey] = groupsMap[groupKey] or {
+                    key = groupKey,
+                    recipes = {},
+                }
 
-            table.insert(groupsMap[groupKey].recipes, recipe)
+                table.insert(groupsMap[groupKey].recipes, recipe)
+            end
         end
 
         for _, group in pairs(groupsMap) do
             table.insert(groups, group)
         end
 
+        local filtersSorting = {}
+
+        for index, filterDef in ipairs(CRAFTING_FILTER_DEFS) do
+            filtersSorting[filterDef.name] = index
+        end
+
         table.sort(groups, function (group1, group2)
             if isTabGrouping then
-                return group1.tab.sort < group2.tab.sort
+                return filtersSorting[group1.key] < filtersSorting[group2.key]
             end
 
             if isKnowledgeGrouping then
@@ -270,5 +329,30 @@ return {
 
     GetReplacedString = function (self, template, replacements)
         return subfmt(template, replacements)
+    end,
+
+    SetKeyBinding = function (self, settingName, callback)
+        self.bindings[settingName] = {
+            callback = callback,
+        }
+
+        local binding = self:GetSetting(settingName)
+
+        if binding ~= "NONE" then
+            self.bindings[settingName].handler = TheInput:AddKeyUpHandler(self.global[binding], callback)
+        end
+    end,
+
+    ChangeKeyBinding = function (self, newBinding, settingName)
+        local binding = self.bindings[settingName]
+        local handler = binding.handler
+
+        if handler then
+            TheInput.onkeyup:RemoveHandler(handler)
+        end
+
+        if newBinding ~= "NONE" then
+            self.bindings[settingName].handler = TheInput:AddKeyUpHandler(self.global[newBinding], binding.callback)
+        end
     end,
 }

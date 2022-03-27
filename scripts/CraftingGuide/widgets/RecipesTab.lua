@@ -20,11 +20,11 @@ local IMPORTANT_EVENTS = {
 
 --- RecipesTab
 --- ChooseItem {(prefab: Prefab, scrollY: number, selectedTabIndex: number) => void}
---- @param options.owner                {Player}      player instance
---- @param options.prefab               {Prefab}      opened item prefab
---- @param options.chooseItem           {ChooseItem}  choose item callback
---- @param options.closePopup           {() => void}  close item popup
---- @param options.resetValuesInHistory {() => void}  reset scroll/tab values in history
+--- @param options.owner                {Player}       player instance
+--- @param options.prefab               {Prefab | nil} opened item prefab
+--- @param options.chooseItem           {ChooseItem}   choose item callback
+--- @param options.closePopup           {() => void}   close item popup
+--- @param options.resetValuesInHistory {() => void}   reset scroll/tab values in history
 local RecipesTab = Class(Widget, function (self, options)
     Widget._ctor(self, "RecipesTab")
 
@@ -37,6 +37,10 @@ local RecipesTab = Class(Widget, function (self, options)
     self.needToUpdateRecipes = false
     self.settingsOpened = false
     self.settings = Util:GetSettings()
+    self.prefab = options.prefab
+    self.selectedTabIndex = 1
+    self.allRecipes = {}
+    self.skins = {}
 
     self.root = self:AddChild(Widget("root"))
     self.tabContent = self.root:AddChild(Widget("tabContent"))
@@ -47,8 +51,6 @@ local RecipesTab = Class(Widget, function (self, options)
     self.settingsButton:SetOnClick(function () self:ShowSettingsContent() end)
     self.settingsButton:SetScale(0.6)
     self.settingsButton:SetPosition(-400, -220)
-
-    self:SetPrefab(options.prefab, 1, 1)
 
     local lastHealthSeg
     local lastHealthPenaltySeg
@@ -127,9 +129,11 @@ function RecipesTab:CreateGrid()
         item_ctor_fn = function ()
             return Recipe({
                 owner = self.owner,
+                skins = self.skins,
                 pagePrefab = self.prefab,
                 closePopup = self.closePopup,
                 chooseItem = function (...) self:ChooseItem(...) end,
+                chooseSkin = function (...) self:ChooseSkin(...) end,
             })
         end,
         apply_fn = function (_, recipeWidget, recipe)
@@ -170,10 +174,15 @@ function RecipesTab:ChooseItem(prefab)
     self.chooseItem(prefab, self.grid.current_scroll_pos, self.selectedTabIndex)
 end
 
+function RecipesTab:ChooseSkin(itemPrefab, skinPrefab)
+    self.skins[itemPrefab] = skinPrefab
+end
+
 function RecipesTab:SetPrefab(prefab, scrollY, selectedTabIndex)
     self.prefab = prefab
     self.selectedTabIndex = selectedTabIndex
     self.allRecipes = Util:GetAllRecipesGrouped(prefab)
+    self.skins = {}
 
     self:CreateTabs()
     self:ShowRecipes()

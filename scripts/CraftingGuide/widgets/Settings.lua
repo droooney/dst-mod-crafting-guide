@@ -28,9 +28,11 @@ local Settings = Class(Widget, function (self)
             local widget = Widget("option" .. index)
 
             widget.background = widget:AddChild(Templates.ListItemBackground(OPTION_WIDTH + OPTION_PADDING, OPTION_HEIGHT))
+            widget.background:Hide()
 
             widget.option = widget:AddChild(Templates.LabelSpinner("", {}, LABEL_WIDTH, SPINNER_WIDTH, OPTION_HEIGHT))
             widget.option.spinner:EnablePendingModificationBackground()
+            widget.option.spinner:Hide()
             widget.option.spinner.OnChanged = function (_, value)
                 Util:SetSetting(widget.option.setting.name, value)
             end
@@ -39,16 +41,21 @@ local Settings = Class(Widget, function (self)
                 widget.option.setting = setting
 
                 widget.option.label:SetString(setting.label)
-                widget.option.spinner:Show()
-                widget.option.spinner:SetOptions(
-                    Util:Map(setting.options, function (option)
-                        return {
-                            data = option.data,
-                            text = option.description,
-                        }
-                    end)
-                )
-                widget.option.spinner:SetSelected(Util:GetSetting(setting.name))
+
+                if setting.name ~= "" then
+                    widget.background:Show()
+
+                    widget.option.spinner:Show()
+                    widget.option.spinner:SetOptions(
+                        Util:Map(setting.options, function (option)
+                            return {
+                                data = option.data,
+                                text = option.description,
+                            }
+                        end)
+                    )
+                    widget.option.spinner:SetSelected(Util:GetSetting(setting.name))
+                end
             end
 
             return widget

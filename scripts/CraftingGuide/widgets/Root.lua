@@ -19,8 +19,8 @@ local INITIAL_TAB_INDEX = 1
 local DEFAULT_TAB = Constants.TabKey.RECIPES
 
 --- Root
---- @param owner  {Player}  player instance
---- @param prefab {Prefab}  opened item prefab
+--- @param owner  {Player}        player instance
+--- @param prefab {Prefab | nil}  opened item prefab
 local Root = Class(Screen, function (self, owner, prefab)
     Screen._ctor(self, "Root")
 
@@ -110,7 +110,11 @@ function Root:ChooseUpperQueueItem()
     local historyItem = self.prefabHistory[#self.prefabHistory]
 
     self:ChooseTab(historyItem.activeTab)
-    self.generalInfoTab:SetPrefab(historyItem.prefab)
+
+    if historyItem.prefab then
+        self.generalInfoTab:SetPrefab(historyItem.prefab)
+    end
+
     self.recipesTab:SetPrefab(historyItem.prefab, historyItem.scrollY, historyItem.selectedTabIndex)
 end
 

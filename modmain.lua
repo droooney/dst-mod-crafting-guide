@@ -6,6 +6,8 @@ local Root = require("CraftingGuide/widgets/Root")
 require("CraftingGuide/i18n/common")
 require("CraftingGuide/i18n/en")
 
+require("strings")
+
 local SUPPORTED_LANGUAGES = {"en", "ru"}
 
 function LoadI18N()
@@ -29,14 +31,20 @@ AddClassPostConstruct("widgets/controls", function ()
         local item = self.tile and self.tile.item
 
         if item and item.prefab then
-            Util:Log("inspecting item from inventory: " .. item.prefab)
-
             self.inst:DoTaskInTime(0, function ()
                 Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer(), item.prefab))
                 self:ClearFocus()
             end)
         end
     end
+
+    Util:SetKeyBinding(Constants.MOD_OPTIONS.KEY_OPEN_ALL, function ()
+        local activeScreen = TheFrontEnd:GetActiveScreen()
+
+        if activeScreen and activeScreen.name == "HUD" then
+            Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer()))
+        end
+    end)
 end)
 
 local settings = {}
@@ -45,5 +53,6 @@ for _, paramName in pairs(Constants.MOD_OPTIONS) do
     settings[paramName] = GetModConfigData(paramName)
 end
 
+Util:SetGlobal(GLOBAL)
 Util:SetModName(modname)
 Util:SetSettings(settings)
