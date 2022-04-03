@@ -22,7 +22,7 @@ local DEFAULT_TAB = Constants.TabKey.RECIPES
 --- @param owner  {Player}        player instance
 --- @param prefab {Prefab | nil}  opened item prefab
 local Root = Class(Screen, function (self, owner, prefab)
-    Screen._ctor(self, "Root")
+    Screen._ctor(self, "CraftingGuideRoot")
 
     self.root = self:AddChild(Widget("root"))
     self.root:SetScaleMode(SCALEMODE_PROPORTIONAL)

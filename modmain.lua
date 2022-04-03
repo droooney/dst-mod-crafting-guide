@@ -47,6 +47,20 @@ AddClassPostConstruct("widgets/controls", function ()
     end)
 end)
 
+AddClassPostConstruct("screens/playerhud", function (self)
+    local oldIsCraftingOpen = self.IsCraftingOpen
+
+    function self:IsCraftingOpen(...)
+        local activeScreen = TheFrontEnd:GetActiveScreen()
+
+        if activeScreen and activeScreen.name == "CraftingGuideRoot" then
+            return true
+        end
+
+        return oldIsCraftingOpen(self,...)
+    end
+end)
+
 local settings = {}
 
 for _, paramName in pairs(Constants.MOD_OPTIONS) do
