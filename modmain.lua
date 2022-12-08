@@ -32,7 +32,7 @@ AddClassPostConstruct("widgets/controls", function ()
 
         if item and item.prefab then
             self.inst:DoTaskInTime(0, function ()
-                Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer(), item.prefab))
+                Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer(), Util:GetItemPrefab(item)))
                 self:ClearFocus()
             end)
         end
@@ -51,13 +51,32 @@ AddClassPostConstruct("screens/playerhud", function (self)
     local oldIsCraftingOpen = self.IsCraftingOpen
 
     function self:IsCraftingOpen(...)
-        local activeScreen = TheFrontEnd:GetActiveScreen()
-
-        if activeScreen and activeScreen.name == "CraftingGuideRoot" then
+        if Util:IsWidgetOpen() then
             return true
         end
 
         return oldIsCraftingOpen(self,...)
+    end
+end)
+
+AddClassPostConstruct("cameras/followcamera", function (self)
+    local oldCanControl = self.CanControl
+    local oldIsControllable = self.IsControllable
+
+    function self:CanControl(...)
+        if Util:IsWidgetOpen() then
+            return false
+        end
+
+        return oldCanControl(self,...)
+    end
+
+    function self:IsControllable(...)
+        if Util:IsWidgetOpen() then
+            return false
+        end
+
+        return oldIsControllable(self,...)
     end
 end)
 

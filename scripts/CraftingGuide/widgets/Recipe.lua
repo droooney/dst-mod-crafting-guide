@@ -15,7 +15,10 @@ require("mathutil")
 require("strings")
 require("widgets/widgetutil")
 
-local INGREDIENT_SIZE = 45
+local INGREDIENTS_SIDE_MARGIN = 20
+local INGREDIENT_SPACING = 2
+local INGREDIENTS_MAX_WIDTH = Constants.RECIPE_WIDTH - INGREDIENTS_SIDE_MARGIN
+local INGREDIENT_MAX_WIDTH = 40
 
 local REQUIREMENT_SIZE = 20
 local REQUIREMENT_SPACING = 2
@@ -154,8 +157,12 @@ function Recipe:SetRecipeData(recipe)
     local isSculpture = Util:StartsWith(recipe.name, "chesspiece_")
 
     self.root:Show()
-    self.name:SetTruncatedString(Util:GetPrefabString(recipe.product), 180, nil, true)
+    self.name:SetTruncatedString(Util:GetPrefabString(recipe.name), 180, nil, true)
     self.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
+
+    if Util:GetBooleanSetting(Constants.MOD_OPTIONS.SHOW_DESCRIPTION_ON_HOVER) then
+        self.recipeSkins.fgimage:SetHoverText(STRINGS.RECIPE_DESC[string.upper(recipe.description or recipe.name)] or "")
+    end
 
     local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
     local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
@@ -174,6 +181,12 @@ function Recipe:SetRecipeData(recipe)
     self.ingredients.items = {}
     self.requirements.items = {}
 
+    local ingredientsCount = Util:GetRecipeIngredientsCount(recipe)
+    local ingredientSize = math.min(
+        INGREDIENT_MAX_WIDTH,
+        math.floor((INGREDIENTS_MAX_WIDTH - (ingredientsCount - 1) * INGREDIENT_SPACING) / ingredientsCount)
+    )
+
     for _, ingredient in ipairs(recipe.tech_ingredients) do
         local has = builder:HasTechIngredient(ingredient)
 
@@ -183,12 +196,17 @@ function Recipe:SetRecipeData(recipe)
             onHand = nil,
             has = has,
             disabled = true,
+            size = ingredientSize,
             chooseItem = self.chooseItem,
         }))
     end
 
     for _, ingredient in ipairs(recipe.ingredients) do
-        local has, onHand = inventory:Has(ingredient.type, RoundBiasedUp(ingredient.amount * builder:IngredientMod()))
+        local has, onHand = inventory:Has(
+            ingredient.type,
+            math.max(1, RoundBiasedUp(ingredient.amount * builder:IngredientMod())),
+            true
+        )
 
         table.insert(self.ingredients.items, Ingredient({
             ingredient = ingredient,
@@ -196,6 +214,7 @@ function Recipe:SetRecipeData(recipe)
             onHand = onHand,
             has = has,
             disabled = ingredient.type == self.pagePrefab,
+            size = ingredientSize,
             chooseItem = self.chooseItem,
         }))
     end
@@ -209,6 +228,7 @@ function Recipe:SetRecipeData(recipe)
             onHand = amount,
             has = has,
             disabled = true,
+            size = ingredientSize,
             chooseItem = self.chooseItem,
         }))
     end
@@ -309,7 +329,7 @@ function Recipe:SetRecipeData(recipe)
 
     for i, ingredient in ipairs(self.ingredients.items) do
         self.ingredients:AddChild(ingredient)
-        ingredient:SetPosition((i - (#self.ingredients.items + 1) / 2) * INGREDIENT_SIZE, 0)
+        ingredient:SetPosition((i - (#self.ingredients.items + 1) / 2) * (ingredientSize + INGREDIENT_SPACING), 0)
     end
 
     for i, requirement in ipairs(self.requirements.items) do
@@ -346,7 +366,7 @@ function Recipe:SetRecipeData(recipe)
     end)
 
     self.rootButton:SetOnClick(function ()
-        self.chooseItem(recipe.product)
+        self.chooseItem(recipe.name)
     end)
 end
 

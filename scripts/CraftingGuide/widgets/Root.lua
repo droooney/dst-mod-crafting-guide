@@ -22,7 +22,7 @@ local DEFAULT_TAB = Constants.TabKey.RECIPES
 --- @param owner  {Player}        player instance
 --- @param prefab {Prefab | nil}  opened item prefab
 local Root = Class(Screen, function (self, owner, prefab)
-    Screen._ctor(self, "CraftingGuideRoot")
+    Screen._ctor(self, "CraftingGuideScreen")
 
     self.root = self:AddChild(Widget("root"))
     self.root:SetScaleMode(SCALEMODE_PROPORTIONAL)
@@ -152,19 +152,23 @@ function Root:OnControl(control, down)
         return true
     end
 
-    if down or (control ~= CONTROL_MAP and control ~= CONTROL_CANCEL) then
-        return false
-    end
-
-    TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
-
-    if control == CONTROL_MAP then
+    if not down and control == CONTROL_MAP then
         Util:GetPlayer().HUD.controls:ToggleMap()
-    elseif not self:TryRecipesBack() then
-        self:Close()
+
+        return true
     end
 
-    return true
+    if not down and control == CONTROL_CANCEL then
+        TheFrontEnd:GetSound():PlaySound("dontstarve/HUD/click_move")
+
+        if not self:TryRecipesBack() then
+            self:Close()
+        end
+
+        return true
+    end
+
+    return false
 end
 
 function Root:OnUpdate(...)

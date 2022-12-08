@@ -2,6 +2,7 @@ local Widget = require("widgets/widget")
 local Button = require("widgets/button")
 local IngredientUI = require("widgets/ingredientui")
 
+local Constants = require("CraftingGuide/Constants")
 local Util = require("CraftingGuide/Util")
 
 --- Ingredient
@@ -10,6 +11,7 @@ local Util = require("CraftingGuide/Util")
 --- @param options.onHand     {number | nil}              amount on hand
 --- @param options.has        {boolean}                   if amount is enough
 --- @param options.disabled   {boolean}                   is button disabled
+--- @param options.size       {number}                    ingredient widget size
 --- @param options.chooseItem {(prefab: Prefab) => void}  choose item callback
 local Ingredient = Class(Widget, function (self, options)
     Widget._ctor(self, "Ingredient")
@@ -23,7 +25,7 @@ local Ingredient = Class(Widget, function (self, options)
         ingredient:GetAtlas(), ingredient:GetImage(), options.needed ~= 0 and options.needed or nil, options.onHand,
         options.has, prefabName, Util:GetPlayer(), ingredient.type
     ))
-    self.ingredientUI:SetScale(0.64)
+    self.ingredientUI:SetScale(options.size / Constants.INGREDIENT_BASE_SIZE)
 
     self:SetHoverText(prefabName)
 

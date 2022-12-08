@@ -1,7 +1,7 @@
 name = "Crafting Guide"
 description = "This mod helps to find out what you can craft from an item in your inventory or any container"
 author = "jimmybaxter"
-version = "0.4"
+version = "0.5"
 api_version = 10
 dst_compatible = true
 all_clients_require_mod = false
@@ -35,12 +35,19 @@ keyBindings[#keyBindings + 1] = {
     description = "None",
 }
 
+local booleanTranslations = {}
+
 local translations = {
     GROUP_BY_OPTIONS = {},
     CHAR_SPECIFIC_OPTIONS = {},
+    SHOW_DESCRIPTION_ON_HOVER_OPTIONS = booleanTranslations,
+    AUTOPAUSE_OPTIONS = booleanTranslations,
 }
 
 -- en
+booleanTranslations.YES = "Yes"
+booleanTranslations.NO = "No"
+
 translations.GROUP_BY = "Group By"
 translations.GROUP_BY_DESCRIPTION = "Sets what recipes grouping should be based on"
 
@@ -55,6 +62,8 @@ translations.CHAR_SPECIFIC_OPTIONS.SHOW_ALL = "Show All"
 translations.CHAR_SPECIFIC_OPTIONS.SHOW_MINE = "Show Only Mine"
 translations.CHAR_SPECIFIC_OPTIONS.HIDE = "Hide"
 
+translations.SHOW_DESCRIPTION_ON_HOVER = "Show description on hover"
+
 translations.KEY_BINDINGS = "Key Bindings"
 
 translations.KEY_BIND_OPEN_ALL = "All Recipes"
@@ -62,6 +71,9 @@ translations.KEY_BIND_OPEN_ALL_DESCRIPTION = "Open the modal with all recipes"
 
 -- ru
 if language == "ru" or locale == "ru" then
+    booleanTranslations.YES = "Да"
+    booleanTranslations.NO = "Нет"
+
     translations.GROUP_BY = "Группировать по"
     translations.GROUP_BY_DESCRIPTION = "По какому признаку группировать рецепты"
 
@@ -75,6 +87,8 @@ if language == "ru" or locale == "ru" then
     translations.CHAR_SPECIFIC_OPTIONS.SHOW_ALL = "Показывать все"
     translations.CHAR_SPECIFIC_OPTIONS.SHOW_MINE = "Показывать только свои"
     translations.CHAR_SPECIFIC_OPTIONS.HIDE = "Скрыть"
+
+    translations.SHOW_DESCRIPTION_ON_HOVER = "Показывать описание по наведению"
 
     translations.KEY_BINDINGS = "Клавиши"
 
@@ -104,6 +118,15 @@ configuration_options = {
         },
         default = "SHOW_ALL",
         hover = translations.CHAR_SPECIFIC_DESCRIPTION,
+    },
+    {
+        name = "SHOW_DESCRIPTION_ON_HOVER",
+        label = translations.SHOW_DESCRIPTION_ON_HOVER,
+        options = {
+            {data = "YES", description = translations.SHOW_DESCRIPTION_ON_HOVER_OPTIONS.YES},
+            {data = "NO", description = translations.SHOW_DESCRIPTION_ON_HOVER_OPTIONS.NO},
+        },
+        default = "NO",
     },
 
     {

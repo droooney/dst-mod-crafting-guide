@@ -46,6 +46,24 @@ return {
         self.settings = settings
     end,
 
+    GetBooleanSetting = function (self, name, default)
+        local value = self:GetSetting(name)
+
+        if value == Constants.BOOLEAN_OPTIONS.YES then
+            return true
+        end
+
+        if value == Constants.BOOLEAN_OPTIONS.NO then
+            return false
+        end
+
+        if default ~= true and default ~= false then
+            return false
+        end
+
+        return default
+    end,
+
     GetSetting = function (self, name)
         return self.settings[name]
     end,
@@ -158,17 +176,24 @@ return {
         local player = self:GetPlayer()
         local builder = player.replica.builder
         local charSpecific = self:GetSetting(Constants.MOD_OPTIONS.CHAR_SPECIFIC)
-        local recipes = {}
 
+        local recipes = {}
         local recipeFilters = {}
+        local filtersSorting = {}
+
+        for index, filterDef in ipairs(CRAFTING_FILTER_DEFS) do
+            filtersSorting[filterDef.name] = index
+        end
 
         for filterName, filter in pairs(CRAFTING_FILTERS) do
             local filterRecipes = FunctionOrValue(filter.recipes) or {}
 
             for _, recipeName in ipairs(filterRecipes) do
-                recipeFilters[recipeName] = recipeFilters[recipeName] or {}
+                if filtersSorting[filterName] then
+                    recipeFilters[recipeName] = recipeFilters[recipeName] or {}
 
-                table.insert(recipeFilters[recipeName], filterName)
+                    table.insert(recipeFilters[recipeName], filterName)
+                end
             end
         end
 
@@ -206,13 +231,13 @@ return {
             return recipe1.sortkey < recipe2.sortkey
         end)
 
-        return recipes, recipeFilters
+        return recipes, recipeFilters, filtersSorting
     end,
 
     GetAllRecipesGrouped = function (self, prefab)
         local player = self:GetPlayer()
         local builder = player.replica.builder
-        local recipes, recipeFilters = self:GetAllRecipes(prefab)
+        local recipes, recipeFilters, filtersSorting = self:GetAllRecipes(prefab)
         local groupsMap = {}
         local groups = {}
         local groupBy = self:GetSetting(Constants.MOD_OPTIONS.GROUP_BY)
@@ -266,12 +291,6 @@ return {
             table.insert(groups, group)
         end
 
-        local filtersSorting = {}
-
-        for index, filterDef in ipairs(CRAFTING_FILTER_DEFS) do
-            filtersSorting[filterDef.name] = index
-        end
-
         table.sort(groups, function (group1, group2)
             if isTabGrouping then
                 return filtersSorting[group1.key] < filtersSorting[group2.key]
@@ -285,6 +304,24 @@ return {
         end)
 
         return groups
+    end,
+
+    GetRecipeIngredientsCount = function (self, recipe)
+        local count = 0
+
+        for _ in ipairs(recipe.tech_ingredients) do
+            count = count + 1
+        end
+
+        for _ in ipairs(recipe.ingredients) do
+            count = count + 1
+        end
+
+        for _ in ipairs(recipe.character_ingredients) do
+            count = count + 1
+        end
+
+        return count
     end,
 
     GetRecipeOwnedSkins = function (self, recipe)
@@ -323,6 +360,16 @@ return {
         return recipe.level.MAGIC >= 10 and recipe.level.SCIENCE >= 10 and recipe.level.ANCIENT >= 10
     end,
 
+    GetItemPrefab = function (self, item)
+        local prefab = item.prefab
+
+        if prefab == "tophat" and item:HasTag("magiciantool") then
+            prefab = "tophat_magician"
+        end
+
+        return prefab
+    end,
+
     GetPrefabString = function (self, prefab)
         return STRINGS.NAMES[string.upper(prefab)] or prefab
     end,
@@ -354,5 +401,15 @@ return {
         if newBinding ~= "NONE" then
             self.bindings[settingName].handler = TheInput:AddKeyUpHandler(self.global[newBinding], binding.callback)
         end
+    end,
+
+    IsWidgetOpen = function ()
+        local activeScreen = TheFrontEnd:GetActiveScreen()
+
+        if activeScreen and activeScreen.name == "CraftingGuideScreen" then
+            return true
+        end
+
+        return false
     end,
 }
