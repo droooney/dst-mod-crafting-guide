@@ -1,7 +1,7 @@
 name = "Crafting Guide"
 description = "This mod helps to find out what you can craft from an item in your inventory or any container"
 author = "jimmybaxter"
-version = "0.5"
+version = "0.6"
 api_version = 10
 dst_compatible = true
 all_clients_require_mod = false
@@ -35,18 +35,19 @@ keyBindings[#keyBindings + 1] = {
     description = "None",
 }
 
-local booleanTranslations = {}
+local booleanOptions = {
+    {data = true},
+    {data = false},
+}
 
 local translations = {
     GROUP_BY_OPTIONS = {},
     CHAR_SPECIFIC_OPTIONS = {},
-    SHOW_DESCRIPTION_ON_HOVER_OPTIONS = booleanTranslations,
-    AUTOPAUSE_OPTIONS = booleanTranslations,
 }
 
 -- en
-booleanTranslations.YES = "Yes"
-booleanTranslations.NO = "No"
+booleanOptions[1].description = "Yes"
+booleanOptions[2].description = "No"
 
 translations.GROUP_BY = "Group By"
 translations.GROUP_BY_DESCRIPTION = "Sets what recipes grouping should be based on"
@@ -62,7 +63,7 @@ translations.CHAR_SPECIFIC_OPTIONS.SHOW_ALL = "Show All"
 translations.CHAR_SPECIFIC_OPTIONS.SHOW_MINE = "Show Only Mine"
 translations.CHAR_SPECIFIC_OPTIONS.HIDE = "Hide"
 
-translations.SHOW_DESCRIPTION_ON_HOVER = "Show description on hover"
+translations.HOVER_SHOW_DESCRIPTION = "Show description on hover"
 
 translations.KEY_BINDINGS = "Key Bindings"
 
@@ -71,8 +72,8 @@ translations.KEY_BIND_OPEN_ALL_DESCRIPTION = "Open the modal with all recipes"
 
 -- ru
 if language == "ru" or locale == "ru" then
-    booleanTranslations.YES = "Да"
-    booleanTranslations.NO = "Нет"
+    booleanOptions[1].description = "Да"
+    booleanOptions[2].description = "Нет"
 
     translations.GROUP_BY = "Группировать по"
     translations.GROUP_BY_DESCRIPTION = "По какому признаку группировать рецепты"
@@ -88,7 +89,7 @@ if language == "ru" or locale == "ru" then
     translations.CHAR_SPECIFIC_OPTIONS.SHOW_MINE = "Показывать только свои"
     translations.CHAR_SPECIFIC_OPTIONS.HIDE = "Скрыть"
 
-    translations.SHOW_DESCRIPTION_ON_HOVER = "Показывать описание по наведению"
+    translations.HOVER_SHOW_DESCRIPTION = "Показывать описание по наведению"
 
     translations.KEY_BINDINGS = "Клавиши"
 
@@ -120,13 +121,10 @@ configuration_options = {
         hover = translations.CHAR_SPECIFIC_DESCRIPTION,
     },
     {
-        name = "SHOW_DESCRIPTION_ON_HOVER",
-        label = translations.SHOW_DESCRIPTION_ON_HOVER,
-        options = {
-            {data = "YES", description = translations.SHOW_DESCRIPTION_ON_HOVER_OPTIONS.YES},
-            {data = "NO", description = translations.SHOW_DESCRIPTION_ON_HOVER_OPTIONS.NO},
-        },
-        default = "NO",
+        name = "HOVER_SHOW_DESCRIPTION",
+        label = translations.HOVER_SHOW_DESCRIPTION,
+        options = booleanOptions,
+        default = false,
     },
 
     {

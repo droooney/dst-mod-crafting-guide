@@ -46,24 +46,6 @@ return {
         self.settings = settings
     end,
 
-    GetBooleanSetting = function (self, name, default)
-        local value = self:GetSetting(name)
-
-        if value == Constants.BOOLEAN_OPTIONS.YES then
-            return true
-        end
-
-        if value == Constants.BOOLEAN_OPTIONS.NO then
-            return false
-        end
-
-        if default ~= true and default ~= false then
-            return false
-        end
-
-        return default
-    end,
-
     GetSetting = function (self, name)
         return self.settings[name]
     end,

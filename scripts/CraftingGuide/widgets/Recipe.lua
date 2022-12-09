@@ -160,7 +160,7 @@ function Recipe:SetRecipeData(recipe)
     self.name:SetTruncatedString(Util:GetPrefabString(recipe.name), 180, nil, true)
     self.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
 
-    if Util:GetBooleanSetting(Constants.MOD_OPTIONS.SHOW_DESCRIPTION_ON_HOVER) then
+    if Util:GetSetting(Constants.MOD_OPTIONS.HOVER_SHOW_DESCRIPTION) then
         self.recipeSkins.fgimage:SetHoverText(STRINGS.RECIPE_DESC[string.upper(recipe.description or recipe.name)] or "")
     end
 
