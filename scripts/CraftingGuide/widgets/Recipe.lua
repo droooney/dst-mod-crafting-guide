@@ -145,6 +145,7 @@ function Recipe:SetRecipeData(recipe)
         return
     end
 
+    local product = Util:GetRecipeProduct(recipe)
     local builder = self.owner.replica.builder
     local inventory = self.owner.replica.inventory
     local knows = builder:KnowsRecipe(recipe.name)
@@ -154,21 +155,21 @@ function Recipe:SetRecipeData(recipe)
     local techLevel = builder:GetTechTrees()
     local techBonuses = builder:GetTechBonuses()
     local shouldHint = not knows and not (canLearn and CanPrototypeRecipe(recipe.level, techLevel))
-    local isSculpture = Util:StartsWith(recipe.name, "chesspiece_")
+    local isSculpture = Util:StartsWith(product, "chesspiece_")
 
     self.root:Show()
-    self.name:SetTruncatedString(Util:GetPrefabString(recipe.name), 180, nil, true)
+    self.name:SetTruncatedString(Util:GetPrefabString(product), 180, nil, true)
     self.craftedCount:SetString(recipe.numtogive == 1 and "" or "x" .. recipe.numtogive)
 
     if Util:GetSetting(Constants.MOD_OPTIONS.HOVER_SHOW_DESCRIPTION) then
-        self.recipeSkins.fgimage:SetHoverText(STRINGS.RECIPE_DESC[string.upper(recipe.description or recipe.name)] or "")
+        self.recipeSkins.fgimage:SetHoverText(Util:GetRecipeDescription(recipe))
     end
 
     local recipeSkins = Util:GetRecipeOwnedSkins(recipe)
-    local lastSkin = Profile:GetLastUsedSkinForItem(recipe.name)
+    local lastSkin = Profile:GetLastUsedSkinForItem(product)
 
     self.recipeSkins:SetOptions(recipeSkins)
-    self.recipeSkins:SetSelected(self.skins[recipe.name] or lastSkin)
+    self.recipeSkins:SetSelected(self.skins[product] or lastSkin)
 
     for _, ingredient in ipairs(self.ingredients.items) do
         ingredient:Kill()
@@ -362,11 +363,11 @@ function Recipe:SetRecipeData(recipe)
         local selectedSkin = self.recipeSkins:GetSelected().data
 
         DoRecipeClick(self.owner, recipe, selectedSkin)
-        Profile:SetLastUsedSkinForItem(recipe.name, selectedSkin)
+        Profile:SetLastUsedSkinForItem(product, selectedSkin)
     end)
 
     self.rootButton:SetOnClick(function ()
-        self.chooseItem(recipe.name)
+        self.chooseItem(product)
     end)
 end
 

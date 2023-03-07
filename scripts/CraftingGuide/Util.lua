@@ -338,6 +338,20 @@ return {
         end)
     end,
 
+    GetRecipeProduct = function(self, recipe)
+        return recipe.name == "tophat_magician" and recipe.name or recipe.product
+    end,
+
+    GetRecipeDescription = function(self, recipe)
+        local product = self:GetRecipeProduct(recipe)
+
+        return (
+            STRINGS.RECIPE_DESC[string.upper(recipe.description or product)]
+            or STRINGS.RECIPE_DESC[string.upper(product)]
+            or ""
+        )
+    end,
+
     IsLostRecipe = function (self, recipe)
         return recipe.level.MAGIC >= 10 and recipe.level.SCIENCE >= 10 and recipe.level.ANCIENT >= 10
     end,
