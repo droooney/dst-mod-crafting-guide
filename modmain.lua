@@ -39,7 +39,7 @@ AddClassPostConstruct("widgets/controls", function ()
     end
 
     Util:SetKeyBinding(Constants.MOD_OPTIONS.KEY_OPEN_ALL, function ()
-        local activeScreen = TheFrontEnd:GetActiveScreen()
+        local activeScreen = GLOBAL.TheFrontEnd:GetActiveScreen()
 
         if activeScreen and activeScreen.name == "HUD" then
             Util:GetPlayer().HUD:OpenScreenUnderPause(Root(Util:GetPlayer()))
