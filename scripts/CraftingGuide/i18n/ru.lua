@@ -10,6 +10,8 @@ STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_RARE_BLUEPRINT = "Нужен �
 STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_SKETCH = "Нужен эскиз"
 STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_BUILD = "Надо быть около {tech}, чтобы создать этот предмет"
 STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_PROTOTYPE = "Надо быть около {tech}, чтобы создать прототип"
+STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_BEFRIEND_SPIDER = "Надо приручить {spider}, чтобы разблокировать этот предмет"
+STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_SCAN_CREATURE = "Надо отсканировать {creatures}, чтобы разблокировать этот предмет"
 
 STRINGS.CRAFTING_GUIDE.TABS.INFO = "Информация"
 STRINGS.CRAFTING_GUIDE.TABS.RECIPES = "Рецепты"

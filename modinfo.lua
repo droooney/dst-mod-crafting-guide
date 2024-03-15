@@ -1,7 +1,7 @@
 name = "Crafting Guide"
 description = "This mod helps to find out what you can craft from an item in your inventory or any container"
 author = "jimmybaxter"
-version = "0.8"
+version = "1.0"
 api_version = 10
 dst_compatible = true
 all_clients_require_mod = false

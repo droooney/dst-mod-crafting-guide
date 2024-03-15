@@ -2,11 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 const map = [
+    ['lunar_forge',   'shadow_forge',         'carnival_prizebooth'],
     ['hermitcrab',    'critterlab',           'moon_altar'],
-    ['ancient_altar', 'ancient_altar_broken'],
+    ['ancient_altar', 'ancient_altar_broken', 'carnival_host'],
 ];
 const mapWidth = 4;
-const mapHeight = 2;
+const mapHeight = 4;
 
 const elements = [];
 
@@ -16,9 +17,9 @@ for (const [y, row] of map.entries()) {
     }
 }
 
-elements.push(Element('checkmark', 3, 0, 0.5, 0.5));
-elements.push(Element('cross', 3.5, 0, 0.5, 0.5));
-elements.push(Element('question', 3, 0.5, 0.5, 0.5));
+elements.push(Element('checkmark', 3, 1, 0.5, 0.5));
+elements.push(Element('cross', 3.5, 1, 0.5, 0.5));
+elements.push(Element('question', 3, 1.5, 0.5, 0.5));
 
 const atlasContents = `<Atlas>
     <Texture filename="icons.tex" />

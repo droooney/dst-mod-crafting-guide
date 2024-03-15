@@ -155,7 +155,9 @@ function Recipe:SetRecipeData(recipe)
     local techLevel = builder:GetTechTrees()
     local techBonuses = builder:GetTechBonuses()
     local shouldHint = not knows and not (canLearn and CanPrototypeRecipe(recipe.level, techLevel))
-    local isSculpture = Util:StartsWith(product, "chesspiece_")
+    local isSculpture = Util:StartsWith(product, "chesspiece_") and Util:EndsWith(product, "_builder")
+    local isModule = Util:StartsWith(product, "wx78module_")
+    local isSwitcherdoodle = Util:StartsWith(product, "mutator_")
 
     self.root:Show()
     self.name:SetTruncatedString(Util:GetPrefabString(product), 180, nil, true)
@@ -302,7 +304,11 @@ function Recipe:SetRecipeData(recipe)
             if Util:Includes(Constants.CUSTOM_PREFAB_ICONS, techPrefab) then
                 techIcon = Image(Constants.CUSTOM_ICONS_ATLAS, techPrefab .. ".tex")
             else
-                local imgTex = techPrefab .. ".tex"
+                local imgTex = (
+                    isSwitcherdoodle
+                        and Constants.REQUIRED_SPIDER[product]
+                        or techPrefab
+                ) .. ".tex"
 
                 techIcon = Image(Util:GetInventoryItemAtlas(imgTex), imgTex)
             end
@@ -317,12 +323,36 @@ function Recipe:SetRecipeData(recipe)
                 )
             end
 
-            techIcon:SetHoverText(Util:GetReplacedString(
-                recipe.nounlock
-                    and STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_BUILD
-                    or STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_PROTOTYPE,
-                { tech = techString }
-            ))
+            local hoverString
+
+            if isModule then
+                local creatures = Constants.REQUIRED_SCANNING[product]
+                local creaturePrefabs = Util:Map(creatures, function (prefab)
+                    return Util:GetPrefabString(prefab)
+                end)
+                local creaturesString = table.concat(creaturePrefabs,"/")
+
+                hoverString = Util:GetReplacedString(
+                    STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_SCAN_CREATURE,
+                    { creatures = creaturesString }
+                )
+            elseif isSwitcherdoodle then
+                local spiderString = Util:GetPrefabString(Constants.REQUIRED_SPIDER[product])
+
+                hoverString = Util:GetReplacedString(
+                    STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_BEFRIEND_SPIDER,
+                    { spider = spiderString }
+                )
+            else
+                hoverString = Util:GetReplacedString(
+                    recipe.nounlock
+                        and STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_BUILD
+                        or STRINGS.CRAFTING_GUIDE.REQUIREMENT_ICONS.REQUIRES_TECH_NEAR_PROTOTYPE,
+                    { tech = techString }
+                )
+            end
+
+            techIcon:SetHoverText(hoverString)
 
             table.insert(self.requirements.items, techIcon)
         end

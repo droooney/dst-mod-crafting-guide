@@ -144,6 +144,10 @@ return {
         return newArray
     end,
 
+    EndsWith = function (self, str, ending)
+        return ending == "" or str:sub(-#ending) == ending
+    end,
+
     StartsWith = function (self, str, start)
         return str:sub(1, #start) == start
     end,
